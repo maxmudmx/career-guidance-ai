@@ -1,0 +1,200 @@
+/* ── NAV ────────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 54px;
+  z-index: 100;
+  /* MUHIM: overflow clip yo'q — dropdown ko'rinsin */
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+  padding: 8px 0;
+  transition: background 0.3s, border-color 0.3s;
+}
+:global(.dark) .nav {
+  background: rgba(10, 7, 26, 0.88);
+  border-bottom: 1px solid rgba(99, 91, 255, 0.18);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.4);
+}
+
+.inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ── LOGO ───────────────────────────────────────────────────────── */
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.logoIcon {
+  width: 32px; height: 32px; border-radius: 9px;
+  background: linear-gradient(135deg, #00D4AA, #635BFF);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 14px rgba(0, 212, 170, 0.35);
+  flex-shrink: 0;
+}
+.logoText {
+  font-family: var(--font-mono);
+  font-weight: 700; font-size: 15px;
+  color: var(--primary); white-space: nowrap;
+}
+.logoAccent { color: var(--accent); }
+
+/* ── STEPS ──────────────────────────────────────────────────────── */
+.steps {
+  display: flex; gap: 3px; align-items: center;
+  flex: 1; justify-content: center; min-width: 0;
+}
+.stepGroup { display: flex; align-items: center; gap: 3px; }
+.stepWrap  { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+
+.stepCircle {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; font-family: var(--font-mono);
+  background: var(--border); color: var(--text-muted);
+  transition: background 0.3s, color 0.3s;
+  flex-shrink: 0;
+}
+.stepCircle.active { background: var(--primary); color: white; }
+.stepCircle.done   { background: var(--accent);  color: white; }
+
+.stepLabel { font-size: 9px; color: var(--text-muted); font-weight: 500; white-space: nowrap; }
+.stepLabelActive { color: var(--primary); font-weight: 700; }
+
+.stepLine {
+  width: 20px; height: 2px; border-radius: 1px;
+  background: var(--border); transition: background 0.3s; flex-shrink: 0;
+}
+.lineDone { background: var(--accent); }
+
+/* ── RIGHT ──────────────────────────────────────────────────────── */
+.right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+/* ── PROFILE WRAP ───────────────────────────────────────────────── */
+.profileWrap {
+  position: relative;
+  z-index: 110;
+}
+
+/* ── AVATAR BUTTON — clean minimalist circle ────────────────────── */
+.avatarBtn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #00D4AA, #635BFF);
+  border: 2px solid rgba(0, 212, 170, 0.35);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; padding: 0;
+  box-shadow: 0 0 14px rgba(0, 212, 170, 0.3);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  overflow: hidden;
+}
+.avatarBtn:hover,
+.avatarBtnActive {
+  border-color: rgba(0, 212, 170, 0.8);
+  box-shadow: 0 0 22px rgba(0, 212, 170, 0.6), 0 0 44px rgba(99, 91, 255, 0.25);
+  transform: scale(1.08);
+}
+
+/* ── DROPDOWN ───────────────────────────────────────────────────── */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 230px;
+  z-index: 500;          /* hamma narsadan yuqori */
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  animation: fadeInUp 0.16s ease both;
+}
+:global(.dark) .dropdown {
+  background: rgba(16, 10, 40, 0.97);
+  border: 1px solid rgba(99, 91, 255, 0.22);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 91, 255, 0.1);
+}
+
+/* Header */
+.dropdownHeader {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 14px 10px;
+}
+.dropdownAvatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #00D4AA, #635BFF);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; box-shadow: 0 0 14px rgba(0, 212, 170, 0.4);
+}
+.dropdownUserInfo { overflow: hidden; flex: 1; }
+.dropdownName {
+  font-size: 13px; font-weight: 700; color: var(--primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dropdownEmail {
+  font-size: 11px; color: var(--text-muted); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Divider */
+.dropdownDivider { height: 1px; background: var(--border); opacity: 0.5; margin: 2px 0; }
+
+/* Items */
+.dropdownItem {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 10px 14px;
+  background: none; border: none;
+  font-size: 13px; font-weight: 500; color: var(--primary);
+  cursor: pointer; text-align: left; font-family: var(--font-body);
+  transition: background 0.15s;
+}
+.dropdownItem:hover { background: rgba(0, 212, 170, 0.07); color: var(--accent); }
+
+/* Theme row */
+.dropdownTheme { justify-content: flex-start; }
+.dropdownTheme:hover { background: rgba(99, 91, 255, 0.07); color: var(--primary); }
+
+.themeIcon { width: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.themeLabel { flex: 1; }
+
+/* Pill switch */
+.pill {
+  margin-left: auto;
+  display: inline-flex; align-items: center;
+  width: 34px; height: 18px; border-radius: 9px;
+  background: rgba(99, 91, 255, 0.18);
+  border: 1px solid rgba(99, 91, 255, 0.28);
+  padding: 2px; flex-shrink: 0;
+  transition: background 0.25s;
+}
+.pillOn {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+.pillDot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #635BFF; transition: transform 0.25s, background 0.25s;
+}
+.pillDotOn { transform: translateX(16px); background: #F59E0B; }
+
+/* Logout */
+.dropdownLogout { color: #EF4444; }
+.dropdownLogout:hover { background: rgba(239, 68, 68, 0.07); color: #EF4444; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .inner { padding: 0 12px; gap: 6px; }
+  .logoText { font-size: 13px; }
+  .logoIcon { width: 28px; height: 28px; }
+  .stepCircle { width: 22px; height: 22px; font-size: 10px; }
+  .stepLine { width: 10px; }
+  .stepLabel { display: none; }
+  .dropdown { right: -4px; width: 210px; }
+}
+@media (max-width: 380px) {
+  .steps { display: none; }
+}
