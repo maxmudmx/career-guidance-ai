@@ -58,7 +58,7 @@ export default function ChangePasswordPage({ onBack }) {
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-md mx-auto">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-8">
           <button
             onClick={onBack}
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-opacity hover:opacity-70"
@@ -74,9 +74,6 @@ export default function ChangePasswordPage({ onBack }) {
             {t('password.title')}
           </h1>
         </div>
-        <p className="text-sm mb-8 ml-[52px]" style={{ color: 'var(--text-muted)' }}>
-          {t('password.subtitle')}
-        </p>
 
         <Card className="p-6">
           <form onSubmit={submit} className="space-y-4">
