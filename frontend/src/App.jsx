@@ -148,7 +148,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
             {user ? (
               <>
                 <NavLink label={t('nav.home')} target="home" />
-                <NavLink label={t('nav.test')} target="test" primary />
+                <NavLink label={t('nav.test')} target="test" />
                 <NavLink label={t('nav.history')} target="history" />
                 <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />

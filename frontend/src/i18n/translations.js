@@ -7,7 +7,7 @@ export const translations = {
   uz: {
     // ─── Navbar ─────────────────────────────────
     'nav.home': 'Bosh sahifa',
-    'nav.test': 'Test',
+    'nav.test': 'Testni boshlash',
     'nav.history': 'Tarix',
     'nav.profile': 'Profil',
     'nav.settings': 'Sozlamalar',
@@ -198,7 +198,7 @@ export const translations = {
   en: {
     // ─── Navbar ─────────────────────────────────
     'nav.home': 'Home',
-    'nav.test': 'Test',
+    'nav.test': 'Start test',
     'nav.history': 'History',
     'nav.profile': 'Profile',
     'nav.settings': 'Settings',
@@ -389,7 +389,7 @@ export const translations = {
   ru: {
     // ─── Navbar ─────────────────────────────────
     'nav.home': 'Главная',
-    'nav.test': 'Тест',
+    'nav.test': 'Начать тест',
     'nav.history': 'История',
     'nav.profile': 'Профиль',
     'nav.settings': 'Настройки',
