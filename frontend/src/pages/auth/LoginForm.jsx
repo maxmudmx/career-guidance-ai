@@ -33,18 +33,10 @@ export default function LoginForm({
         error={errors.password}
       />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center">
         <Checkbox name="remember" checked={remember} onChange={onRememberChange}>
           Eslab qol
         </Checkbox>
-        <button
-          type="button"
-          onClick={onForgotPassword}
-          className="text-sm font-medium hover:underline transition-colors"
-          style={{ color: 'var(--accent)' }}
-        >
-          Parolni unutdingizmi?
-        </button>
       </div>
 
       {serverError && (
