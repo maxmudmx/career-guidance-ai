@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import {
   Brain, LogOut, Loader2, History, User, Sun, Moon,
-  Home, ClipboardList, Menu, X,
+  Home, ClipboardList, Menu, X, Settings,
 } from 'lucide-react';
 import WelcomePage from './pages/WelcomePage';
 import AuthPage from './pages/AuthPage';
@@ -15,6 +15,7 @@ import AcademicSkills from './pages/AcademicSkills';
 import ResultsPage from './pages/ResultsPage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import './index.css';
@@ -71,6 +72,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink icon={ClipboardList} label="Test" target="test" primary />
                 <NavLink icon={History} label="Tarix" target="history" />
                 <NavLink icon={User} label="Profil" target="profile" />
+                <NavLink icon={Settings} label="Sozlamalar" target="settings" />
 
                 <button
                   onClick={toggle}
@@ -134,6 +136,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink icon={ClipboardList} label="Test boshlash" target="test" />
                 <NavLink icon={History} label="Tarix" target="history" />
                 <NavLink icon={User} label="Profil" target="profile" />
+                <NavLink icon={Settings} label="Sozlamalar" target="settings" />
                 <button
                   onClick={toggle}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100"
@@ -282,6 +285,14 @@ function AppInner() {
           user={user}
           onBack={() => setRoute('home')}
           onUserUpdate={(updated) => setUser((u) => ({ ...u, ...updated }))}
+        />
+      )}
+
+      {route === 'settings' && user && (
+        <SettingsPage
+          user={user}
+          onBack={() => setRoute('home')}
+          onLogout={handleLogout}
         />
       )}
 
