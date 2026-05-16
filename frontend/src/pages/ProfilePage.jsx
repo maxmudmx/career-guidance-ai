@@ -362,10 +362,14 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
           </h2>
           <button
             onClick={onClose}
-            className="px-2 py-1 rounded-lg text-sm hover:opacity-70"
-            style={{ color: 'var(--text-muted)' }}
+            className="w-8 h-8 rounded-lg flex items-center justify-center hover:opacity-70"
+            style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+            aria-label="Close"
           >
-            Yopish
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
 
