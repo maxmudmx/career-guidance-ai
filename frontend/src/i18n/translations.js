@@ -11,6 +11,7 @@ export const translations = {
     'nav.history': 'Tarix',
     'nav.profile': 'Profil',
     'nav.settings': 'Sozlamalar',
+    'nav.contact': "Bog'lanish",
     'nav.logout': 'Chiqish',
     'nav.login_register': "Kirish / Ro'yxatdan o'tish",
     'nav.menu': 'Menyu',
@@ -185,6 +186,18 @@ export const translations = {
     'settings.logout.btn': 'Chiqish',
     'settings.logout.confirm': "Rostdan ham chiqishni xohlaysizmi?",
 
+    // ─── Contact ────────────────────────────────
+    'contact.title': "Biz bilan bog'lanish",
+    'contact.subtitle': 'Savol, taklif yoki hamkorlik uchun yozing',
+    'contact.email': 'Email',
+    'contact.phone': 'Telefon',
+    'contact.telegram': 'Telegram',
+    'contact.location': 'Manzil',
+    'contact.location_value': "O'zbekiston, Toshkent",
+    'contact.developer': 'Dasturchi',
+    'contact.developer_name': 'Maxmud Elmurodov',
+    'contact.developer_role': 'Diplom ishi muallifi · 2026',
+
     // ─── Common ─────────────────────────────────
     'common.back': 'Orqaga',
     'common.next': 'Keyingisi',
@@ -202,6 +215,7 @@ export const translations = {
     'nav.history': 'History',
     'nav.profile': 'Profile',
     'nav.settings': 'Settings',
+    'nav.contact': 'Contact',
     'nav.logout': 'Logout',
     'nav.login_register': 'Login / Sign up',
     'nav.menu': 'Menu',
@@ -376,6 +390,18 @@ export const translations = {
     'settings.logout.btn': 'Log out',
     'settings.logout.confirm': 'Are you sure you want to log out?',
 
+    // ─── Contact ────────────────────────────────
+    'contact.title': 'Contact us',
+    'contact.subtitle': 'Get in touch for questions, suggestions, or collaboration',
+    'contact.email': 'Email',
+    'contact.phone': 'Phone',
+    'contact.telegram': 'Telegram',
+    'contact.location': 'Location',
+    'contact.location_value': 'Uzbekistan, Tashkent',
+    'contact.developer': 'Developer',
+    'contact.developer_name': 'Mahmud Elmurodov',
+    'contact.developer_role': 'Diploma project author · 2026',
+
     // ─── Common ─────────────────────────────────
     'common.back': 'Back',
     'common.next': 'Next',
@@ -393,6 +419,7 @@ export const translations = {
     'nav.history': 'История',
     'nav.profile': 'Профиль',
     'nav.settings': 'Настройки',
+    'nav.contact': 'Контакты',
     'nav.logout': 'Выход',
     'nav.login_register': 'Войти / Регистрация',
     'nav.menu': 'Меню',
@@ -566,6 +593,18 @@ export const translations = {
     'settings.logout.desc_suffix': '',
     'settings.logout.btn': 'Выйти',
     'settings.logout.confirm': 'Вы действительно хотите выйти?',
+
+    // ─── Contact ────────────────────────────────
+    'contact.title': 'Связаться с нами',
+    'contact.subtitle': 'Свяжитесь для вопросов, предложений или сотрудничества',
+    'contact.email': 'Email',
+    'contact.phone': 'Телефон',
+    'contact.telegram': 'Telegram',
+    'contact.location': 'Адрес',
+    'contact.location_value': 'Узбекистан, Ташкент',
+    'contact.developer': 'Разработчик',
+    'contact.developer_name': 'Махмуд Элмуродов',
+    'contact.developer_role': 'Автор дипломной работы · 2026',
 
     // ─── Common ─────────────────────────────────
     'common.back': 'Назад',

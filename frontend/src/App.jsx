@@ -12,6 +12,7 @@ import ResultsPage from './pages/ResultsPage';
 import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import ContactPage from './pages/ContactPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
@@ -152,6 +153,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink label={t('nav.history')} target="history" />
                 <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />
+                <NavLink label={t('nav.contact')} target="contact" />
                 <ThemeToggleButton />
                 <LanguageDropdown />
                 <button
@@ -202,6 +204,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink label={t('nav.history')} target="history" />
                 <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />
+                <NavLink label={t('nav.contact')} target="contact" />
                 <button
                   onClick={onLogout}
                   className="px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100 text-left"
@@ -349,6 +352,8 @@ function AppInner() {
           onLogout={handleLogout}
         />
       )}
+
+      {route === 'contact' && <ContactPage />}
 
       {route === 'test' && user && (
         <>

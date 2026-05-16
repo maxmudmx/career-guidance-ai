@@ -32,8 +32,8 @@ export default function SettingsPage({ user, onLogout }) {
           </div>
         </Card>
 
-        {/* Language — dropdown */}
-        <Card className="overflow-hidden mb-3">
+        {/* Language — dropdown (overflow-visible, dropdown card'dan tashqarida ko'rinishi uchun) */}
+        <Card className="mb-3" style={{ overflow: 'visible' }}>
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
