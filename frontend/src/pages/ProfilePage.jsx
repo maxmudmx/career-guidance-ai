@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { userAPI, tokenStorage } from '../services/api';
+import { useTranslation } from '../contexts/LanguageContext';
 
 
 function staticBase() {
@@ -43,6 +44,31 @@ function ImageViewer({ src, onClose }) {
 }
 
 
+function ImageViewerWithT({ src, onClose }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 px-3 py-1.5 text-sm text-white bg-white/10 hover:bg-white/20 rounded-lg"
+      >
+        {t('nav.close')}
+      </button>
+      <img
+        src={src}
+        alt="avatar"
+        className="max-w-full max-h-full object-contain rounded-lg"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+
 function ActionButton({ label, onClick, disabled }) {
   return (
     <button
@@ -62,6 +88,7 @@ function ActionButton({ label, onClick, disabled }) {
 
 
 export default function ProfilePage({ user: initialUser, onBack, onUserUpdate }) {
+  const { t } = useTranslation();
   const [profile, setProfile] = useState(initialUser);
   const [uploading, setUploading] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
@@ -91,7 +118,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      showError("Rasm hajmi 5 MB dan oshmasligi kerak");
+      showError(t('profile.avatar_too_big'));
       return;
     }
     setUploading(true);
@@ -100,9 +127,9 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
       const res = await userAPI.uploadAvatar(file);
       setProfile((p) => ({ ...p, avatar_url: res.data.avatar_url }));
       onUserUpdate?.({ ...profile, avatar_url: res.data.avatar_url });
-      showSuccess("Avatar yangilandi");
+      showSuccess(t('profile.avatar_updated'));
     } catch (err) {
-      showError(err?.response?.data?.detail || "Avatar yuklab bo'lmadi");
+      showError(err?.response?.data?.detail || t('profile.avatar_upload_failed'));
     } finally {
       setUploading(false);
       e.target.value = '';
@@ -111,15 +138,15 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
 
   const handleDeleteAvatar = async () => {
     if (!profile?.avatar_url) return;
-    if (!confirm("Avatarni o'chirishni xohlaysizmi?")) return;
+    if (!confirm(t('profile.confirm_delete_avatar'))) return;
     setUploading(true);
     try {
       await userAPI.deleteAvatar();
       setProfile((p) => ({ ...p, avatar_url: null }));
       onUserUpdate?.({ ...profile, avatar_url: null });
-      showSuccess("Avatar o'chirildi");
+      showSuccess(t('profile.avatar_deleted'));
     } catch (err) {
-      showError("O'chirib bo'lmadi");
+      showError(t('profile.delete_failed'));
     } finally {
       setUploading(false);
     }
@@ -130,7 +157,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
     onUserUpdate?.(updated);
     if (newToken) tokenStorage.set(newToken);
     setEditModalOpen(false);
-    showSuccess("Profil yangilandi");
+    showSuccess(t('profile.profile_updated'));
   };
 
   const formatDate = (iso) => {
@@ -178,7 +205,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
             )}
             {uploading && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-xs">
-                Yuklanmoqda...
+                {t('profile.uploading')}
               </div>
             )}
           </div>
@@ -188,7 +215,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           </h1>
           <p className="text-sm flex items-center justify-center gap-1.5 mt-1" style={{ color: 'var(--text-muted)' }}>
             <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'var(--text)' }} />
-            onlayn
+            {t('profile.online')}
           </p>
         </div>
 
@@ -202,12 +229,12 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
             className="hidden"
           />
           <ActionButton
-            label="Rasm belgilash"
+            label={t('profile.btn.upload')}
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
           />
           <ActionButton
-            label="Axborotni tahrirlash"
+            label={t('profile.btn.edit')}
             onClick={() => setEditModalOpen(true)}
           />
         </div>
@@ -220,7 +247,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
               className="text-xs opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
               style={{ color: 'var(--text-muted)' }}
             >
-              Avatarni o'chirish
+              {t('profile.btn.delete_avatar')}
             </button>
           </div>
         )}
@@ -228,20 +255,20 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
         {/* Ma'lumotlar */}
         <Card className="overflow-hidden">
           {profile?.full_name && (
-            <ProfileRow label="To'liq ism" value={profile.full_name} />
+            <ProfileRow label={t('profile.field.full_name')} value={profile.full_name} />
           )}
-          <ProfileRow label="Foydalanuvchi nomi" value={`@${profile?.username || ''}`} />
+          <ProfileRow label={t('profile.field.username')} value={`@${profile?.username || ''}`} />
           {profile?.email && (
-            <ProfileRow label="Email" value={profile.email} />
+            <ProfileRow label={t('profile.field.email')} value={profile.email} />
           )}
           {profile?.region && (
-            <ProfileRow label="Region" value={profile.region} />
+            <ProfileRow label={t('profile.field.region')} value={profile.region} />
           )}
           {profile?.date_of_birth && (
-            <ProfileRow label="Tug'ilgan kun" value={formatDate(profile.date_of_birth)} />
+            <ProfileRow label={t('profile.field.birthday')} value={formatDate(profile.date_of_birth)} />
           )}
           {profile?.stats && (
-            <ProfileRow label="Topshirilgan testlar" value={`${profile.stats.test_count || 0} ta`} />
+            <ProfileRow label={t('profile.field.tests_taken')} value={`${profile.stats.test_count || 0} ${t('profile.tests_unit')}`} />
           )}
         </Card>
 

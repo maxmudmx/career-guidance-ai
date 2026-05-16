@@ -14,10 +14,12 @@ import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
 import './index.css';
 
 
 function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const NavLink = ({ label, target, primary }) => (
@@ -55,29 +57,26 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                <NavLink label="Bosh sahifa" target="home" />
-                <NavLink label="Test" target="test" primary />
-                <NavLink label="Tarix" target="history" />
-                <NavLink label="Profil" target="profile" />
-                <NavLink label="Sozlamalar" target="settings" />
+                <NavLink label={t('nav.home')} target="home" />
+                <NavLink label={t('nav.test')} target="test" primary />
+                <NavLink label={t('nav.history')} target="history" />
+                <NavLink label={t('nav.profile')} target="profile" />
+                <NavLink label={t('nav.settings')} target="settings" />
                 <button
                   onClick={onLogout}
                   className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-70"
                   style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
                 >
-                  Chiqish
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
               <button
                 onClick={onStartTest}
                 className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                style={{
-                  background: 'var(--text)',
-                  color: 'var(--bg)',
-                }}
+                style={{ background: 'var(--text)', color: 'var(--bg)' }}
               >
-                Kirish / Ro'yxatdan o'tish
+                {t('nav.login_register')}
               </button>
             )}
           </div>
@@ -87,7 +86,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
             className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
           >
-            {menuOpen ? 'Yopish' : 'Menyu'}
+            {menuOpen ? t('nav.close') : t('nav.menu')}
           </button>
         </div>
 
@@ -98,29 +97,26 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           >
             {user ? (
               <>
-                <NavLink label="Bosh sahifa" target="home" />
-                <NavLink label="Test boshlash" target="test" />
-                <NavLink label="Tarix" target="history" />
-                <NavLink label="Profil" target="profile" />
-                <NavLink label="Sozlamalar" target="settings" />
+                <NavLink label={t('nav.home')} target="home" />
+                <NavLink label={t('nav.test')} target="test" />
+                <NavLink label={t('nav.history')} target="history" />
+                <NavLink label={t('nav.profile')} target="profile" />
+                <NavLink label={t('nav.settings')} target="settings" />
                 <button
                   onClick={onLogout}
                   className="px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100 text-left"
                   style={{ color: 'var(--text)' }}
                 >
-                  Chiqish
+                  {t('nav.logout')}
                 </button>
               </>
             ) : (
               <button
                 onClick={() => { onStartTest(); setMenuOpen(false); }}
                 className="px-4 py-2 rounded-lg text-sm font-semibold"
-                style={{
-                  background: 'var(--text)',
-                  color: 'var(--bg)',
-                }}
+                style={{ background: 'var(--text)', color: 'var(--bg)' }}
               >
-                Kirish / Ro'yxatdan o'tish
+                {t('nav.login_register')}
               </button>
             )}
           </div>
@@ -291,8 +287,10 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppInner />
-    </ThemeProvider>
+    <LanguageProvider>
+      <ThemeProvider>
+        <AppInner />
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }

@@ -1,5 +1,6 @@
 import { Field, PasswordField, Checkbox } from './Field';
 import { Button } from '../../components/ui';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function SignUpForm({
   form,
@@ -11,10 +12,11 @@ export default function SignUpForm({
   agreed,
   onAgreeChange,
 }) {
+  const { t } = useTranslation();
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <Field
-        label="Username"
+        label={t('auth.field.username')}
         name="username"
         value={form.username}
         onChange={onChange}
@@ -23,32 +25,35 @@ export default function SignUpForm({
         error={errors.username}
       />
       <Field
-        label="Email"
+        label={t('auth.field.email')}
         name="email"
         type="email"
         value={form.email}
         onChange={onChange}
-        placeholder="sizning@email.com"
+        placeholder="your@email.com"
         autoComplete="email"
         error={errors.email}
       />
       <PasswordField
-        label="Parol"
+        label={t('auth.field.password')}
         name="password"
         value={form.password}
         onChange={onChange}
-        placeholder="kamida 6 ta belgi"
+        placeholder="••••••••"
         autoComplete="new-password"
         error={errors.password}
       />
 
       <Checkbox name="agree" checked={agreed} onChange={onAgreeChange}>
-        Men <span className="text-[#2563EB]">Foydalanish shartlari</span> va{' '}
-        <span className="text-[#2563EB]">Maxfiylik siyosati</span>ga roziman
+        {t('auth.terms')} <span style={{ color: 'var(--text)' }}>{t('auth.terms_link')}</span>
+        {' '}&{' '}
+        <span style={{ color: 'var(--text)' }}>{t('auth.privacy_link')}</span>
+        {t('auth.terms_agree')}
       </Checkbox>
 
       {serverError && (
-        <div className="p-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg text-sm text-[#DC2626]">
+        <div className="p-3 rounded-lg text-sm"
+          style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}>
           {serverError}
         </div>
       )}
@@ -59,11 +64,7 @@ export default function SignUpForm({
         disabled={loading || !agreed}
         className="w-full mt-2"
       >
-        {loading ? (
-          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        ) : (
-          "Ro'yxatdan o'tish"
-        )}
+        {loading ? '...' : t('auth.btn.signup')}
       </Button>
     </form>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Card } from '../components/ui';
 import { statsAPI } from '../services/api';
+import { useTranslation } from '../contexts/LanguageContext';
 
 const STEPS = [
   { step: '01', title: 'Test topshiring', desc: '30 ta RIASEC savoliga javob bering' },
@@ -181,6 +182,7 @@ function LiveDot() {
 }
 
 export default function WelcomePage({ onStart }) {
+  const { t } = useTranslation();
   const [activeNow, setActiveNow] = useState(0);
   const [overview, setOverview] = useState(null);
 
@@ -228,7 +230,7 @@ export default function WelcomePage({ onStart }) {
             }}
           >
             <span style={{ color: 'var(--text)' }}>
-              Hozir <strong>{activeNow}</strong> ta foydalanuvchi onlayn
+              <strong>{activeNow}</strong> {t('welcome.hero.online')}
             </span>
           </div>
 
@@ -236,23 +238,23 @@ export default function WelcomePage({ onStart }) {
             className="text-5xl md:text-6xl mb-6 leading-[1.1] font-bold"
             style={{ color: 'var(--text)', letterSpacing: '-0.03em' }}
           >
-            Kelajak kasbingizni
+            {t('welcome.hero.title_1')}
             <br />
-            <span style={{ color: 'var(--accent)' }}>sun'iy intellekt</span> bilan toping
+            <span style={{ color: 'var(--accent)' }}>{t('welcome.hero.title_2')}</span>
+            {t('welcome.hero.title_3') && <> {t('welcome.hero.title_3')}</>}
           </h1>
 
           <p
             className="text-base md:text-lg mb-2 max-w-2xl mx-auto leading-relaxed"
             style={{ color: 'var(--text-muted)' }}
           >
-            Qiziqishlaringiz, ko'nikmalaringiz va akademik natijalaringizni tahlil qilib,
-            sizga eng mos kasbni topib beramiz.
+            {t('welcome.hero.description')}
           </p>
           <p
             className="text-base max-w-2xl mx-auto leading-relaxed font-medium mb-8"
             style={{ color: 'var(--accent)' }}
           >
-            5 daqiqa — butun umringizga to'g'ri yo'nalish.
+            {t('welcome.hero.tagline')}
           </p>
 
           <button
@@ -263,7 +265,7 @@ export default function WelcomePage({ onStart }) {
               color: 'var(--bg)',
             }}
           >
-            Testni boshlash
+            {t('welcome.cta.start')}
           </button>
         </div>
       </section>
@@ -280,24 +282,24 @@ export default function WelcomePage({ onStart }) {
                 border: '1px solid var(--accent-border)',
               }}
             >
-              Kasbim hamjamiyati
+              {t('welcome.community')}
             </div>
             <h2
               className="text-2xl sm:text-3xl font-bold mb-2"
               style={{ color: 'var(--text)', letterSpacing: '-0.02em' }}
             >
-              Bizda nima sodir bo'lyapti
+              {t('welcome.stats.title')}
             </h2>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Tizimimizdagi haqiqiy raqamlar — har 30 sekundda yangilanadi
+              {t('welcome.stats.subtitle')}
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <AppStatCard value={totalUsers} label="Foydalanuvchilar" color="var(--accent)" />
-            <AppStatCard value={activeNow} label="Hozir onlayn" color="var(--text)" showLive />
-            <AppStatCard value={totalTests} label="Testlar o'tkazilgan" color="var(--accent)" />
-            <AppStatCard value={testsThisWeek} label="Bu hafta testlar" color="var(--text)" />
+            <AppStatCard value={totalUsers} label={t('welcome.stats.users')} color="var(--accent)" />
+            <AppStatCard value={activeNow} label={t('welcome.stats.online')} color="var(--text)" showLive />
+            <AppStatCard value={totalTests} label={t('welcome.stats.tests')} color="var(--accent)" />
+            <AppStatCard value={testsThisWeek} label={t('welcome.stats.tests_week')} color="var(--text)" />
           </div>
 
           {/* Mashhur kasblar va dominant tip */}

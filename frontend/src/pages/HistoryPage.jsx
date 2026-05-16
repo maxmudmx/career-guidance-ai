@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { userAPI } from '../services/api';
+import { useTranslation } from '../contexts/LanguageContext';
 
 export default function HistoryPage({ onBack }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
@@ -12,20 +14,20 @@ export default function HistoryPage({ onBack }) {
     setLoading(true);
     userAPI.getHistory()
       .then((res) => setHistory(res.data?.history || []))
-      .catch((err) => setError(err?.response?.data?.detail || "Yuklab bo'lmadi"))
+      .catch((err) => setError(err?.response?.data?.detail || t('common.error')))
       .finally(() => setLoading(false));
   };
 
   useEffect(load, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Bu test natijasini o'chirishni xohlaysizmi?")) return;
+    if (!confirm(t('history.confirm_delete'))) return;
     setDeletingId(id);
     try {
       await userAPI.deleteHistory(id);
       setHistory((h) => h.filter((item) => item.id !== id));
     } catch (err) {
-      alert("O'chirib bo'lmadi: " + (err?.response?.data?.detail || err.message));
+      alert(t('history.delete_failed') + ' ' + (err?.response?.data?.detail || err.message));
     } finally {
       setDeletingId(null);
     }
@@ -44,41 +46,41 @@ export default function HistoryPage({ onBack }) {
     <div className="min-h-screen px-4 py-10 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text)' }}>
-          Mening testlarim
+          {t('history.title')}
         </h1>
         <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
-          Avvalgi test natijalaringiz va tavsiyalar
+          {t('history.subtitle')}
         </p>
 
         {loading && (
           <div className="text-center py-16">
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</p>
+            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{t('history.loading')}</p>
           </div>
         )}
 
         {!loading && error && (
           <Card className="p-6 text-center">
             <p className="text-sm mb-4" style={{ color: 'var(--text)' }}>{error}</p>
-            <Button variant="primary" onClick={load}>Qaytadan</Button>
+            <Button variant="primary" onClick={load}>{t('history.btn.retry')}</Button>
           </Card>
         )}
 
         {!loading && !error && history.length === 0 && (
           <Card className="p-10 text-center">
             <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>
-              Hali test topshirmagansiz
+              {t('history.empty.title')}
             </h3>
             <p className="text-sm mb-6" style={{ color: 'var(--text-muted)' }}>
-              Birinchi testni topshirib, sizga mos kasblarni toping
+              {t('history.empty.subtitle')}
             </p>
-            <Button variant="primary" onClick={onBack}>Testni boshlash</Button>
+            <Button variant="primary" onClick={onBack}>{t('history.empty.btn')}</Button>
           </Card>
         )}
 
         {!loading && !error && history.length > 0 && (
           <div className="space-y-4">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Jami: <strong style={{ color: 'var(--text)' }}>{history.length}</strong> ta test
+              {t('history.total')} <strong style={{ color: 'var(--text)' }}>{history.length}</strong> {t('history.tests')}
             </p>
             {history.map((item) => (
               <HistoryCard
@@ -87,6 +89,7 @@ export default function HistoryPage({ onBack }) {
                 onDelete={() => handleDelete(item.id)}
                 isDeleting={deletingId === item.id}
                 formatDate={formatDate}
+                t={t}
               />
             ))}
           </div>
@@ -96,7 +99,7 @@ export default function HistoryPage({ onBack }) {
   );
 }
 
-function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
+function HistoryCard({ item, onDelete, isDeleting, formatDate, t }) {
   const topCareer = item.recommendations?.[0];
   const riasecDominant = Object.entries(item.riasec_scores || {})
     .sort(([, a], [, b]) => b - a)[0];
@@ -113,20 +116,20 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
           className="text-xs px-2 py-1 rounded hover:opacity-70 transition-opacity disabled:opacity-50"
           style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
         >
-          {isDeleting ? "..." : "O'chirish"}
+          {isDeleting ? "..." : t('history.btn.delete')}
         </button>
       </div>
 
       {topCareer && (
         <div className="mb-3">
           <div className="text-xs uppercase font-semibold mb-1" style={{ color: 'var(--text-faint)' }}>
-            Eng yaxshi tavsiya
+            {t('history.best_match')}
           </div>
           <div className="text-lg font-bold" style={{ color: 'var(--text)' }}>
             {topCareer.name_uz}
           </div>
           <div className="text-xs" style={{ color: 'var(--accent)' }}>
-            Mos kelish: {Math.round((topCareer.score || 0) * 100)}%
+            {t('history.match_label')} {Math.round((topCareer.score || 0) * 100)}%
           </div>
         </div>
       )}
@@ -134,7 +137,7 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div>
           <div className="font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
-            Dominant RIASEC
+            {t('history.dominant_riasec')}
           </div>
           <div style={{ color: 'var(--text)' }}>
             {riasecDominant ? `${riasecDominant[0]} = ${riasecDominant[1]}` : '—'}
@@ -142,7 +145,7 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
         </div>
         <div>
           <div className="font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
-            Tavsiyalar soni
+            {t('history.recommendations_count')}
           </div>
           <div style={{ color: 'var(--text)' }}>
             {(item.recommendations || []).length}
@@ -156,7 +159,7 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
             className="text-xs cursor-pointer hover:underline"
             style={{ color: 'var(--accent)' }}
           >
-            Barcha tavsiyalarni ko'rish
+            {t('history.show_all')}
           </summary>
           <ol className="mt-2 ml-4 space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
             {item.recommendations.map((r, i) => (

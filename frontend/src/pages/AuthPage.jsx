@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authAPI, tokenStorage } from '../services/api';
+import { useTranslation } from '../contexts/LanguageContext';
 import SignUpForm from './auth/SignUpForm';
 import LoginForm from './auth/LoginForm';
 import PendingVerify from './auth/PendingVerify';
@@ -9,25 +10,32 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 }
 
-function validateRegister({ username, email, password }) {
-  const e = {};
-  if (!username?.trim()) e.username = 'Username majburiy';
-  else if (!/^[a-zA-Z0-9_.]+$/.test(username)) e.username = "Faqat harf, raqam, '_' va '.'";
-  if (!email?.trim()) e.email = 'Email majburiy';
-  else if (!isValidEmail(email)) e.email = 'Yaroqli email kiriting';
-  if (!password) e.password = 'Parol majburiy';
-  else if (password.length < 6) e.password = 'Kamida 6 ta belgi';
-  return e;
+function makeValidateRegister(t) {
+  return function validateRegister({ username, email, password }) {
+    const e = {};
+    if (!username?.trim()) e.username = t('auth.error.username_required');
+    else if (!/^[a-zA-Z0-9_.]+$/.test(username)) e.username = t('auth.error.username_format');
+    if (!email?.trim()) e.email = t('auth.error.email_required');
+    else if (!isValidEmail(email)) e.email = t('auth.error.email_invalid');
+    if (!password) e.password = t('auth.error.password_required');
+    else if (password.length < 6) e.password = t('auth.error.password_min');
+    return e;
+  };
 }
 
-function validateLogin({ username, password }) {
-  const e = {};
-  if (!username?.trim()) e.username = 'Username yoki email majburiy';
-  if (!password) e.password = 'Parol majburiy';
-  return e;
+function makeValidateLogin(t) {
+  return function validateLogin({ username, password }) {
+    const e = {};
+    if (!username?.trim()) e.username = t('auth.error.login_required');
+    if (!password) e.password = t('auth.error.password_required');
+    return e;
+  };
 }
 
 export default function AuthPage({ onAuth }) {
+  const { t } = useTranslation();
+  const validateRegister = makeValidateRegister(t);
+  const validateLogin = makeValidateLogin(t);
   const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
@@ -120,11 +128,11 @@ export default function AuthPage({ onAuth }) {
       } else if (detail?.message) {
         msg = detail.message;
       } else if (err.response?.status) {
-        msg = `Server xatosi: HTTP ${err.response.status}`;
+        msg = `HTTP ${err.response.status}`;
       } else if (err.message) {
-        msg = `Tarmoq xatosi: ${err.message}`;
+        msg = err.message;
       } else {
-        msg = "Xatolik yuz berdi. Qayta urinib ko'ring.";
+        msg = t('auth.error.generic');
       }
       setServerError(msg);
     } finally {
@@ -170,12 +178,10 @@ export default function AuthPage({ onAuth }) {
             className="text-3xl mb-2 font-bold"
             style={{ color: 'var(--text)', letterSpacing: '-0.02em' }}
           >
-            {isSignup ? 'Hisob yaratish' : 'Xush kelibsiz'}
+            {isSignup ? t('auth.signup.title') : t('auth.login.title')}
           </h2>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {isSignup
-              ? "Kasbingizni topish uchun ro'yxatdan o'ting"
-              : 'Hisobingizga kiring'}
+            {isSignup ? t('auth.signup.subtitle') : t('auth.login.subtitle')}
           </p>
         </div>
 
@@ -207,14 +213,14 @@ export default function AuthPage({ onAuth }) {
 
         <div className="mt-6 text-center">
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            {isSignup ? 'Hisobingiz bormi?' : "Hisobingiz yo'qmi?"}{' '}
+            {isSignup ? t('auth.have_account') : t('auth.no_account')}{' '}
             <button
               type="button"
               onClick={() => switchMode(isSignup ? 'login' : 'signup')}
               className="font-semibold hover:underline transition-colors"
               style={{ color: 'var(--text)' }}
             >
-              {isSignup ? 'Kirish' : "Ro'yxatdan o'tish"}
+              {isSignup ? t('auth.switch.login') : t('auth.switch.signup')}
             </button>
           </p>
         </div>

@@ -1,5 +1,6 @@
 import { Field, PasswordField, Checkbox } from './Field';
 import { Button } from '../../components/ui';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function LoginForm({
   form,
@@ -10,21 +11,21 @@ export default function LoginForm({
   onSubmit,
   remember,
   onRememberChange,
-  onForgotPassword,
 }) {
+  const { t } = useTranslation();
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       <Field
-        label="Username yoki email"
+        label={`${t('auth.field.username')} / ${t('auth.field.email')}`}
         name="username"
         value={form.username}
         onChange={onChange}
-        placeholder="username yoki email"
+        placeholder=""
         autoComplete="username"
         error={errors.username}
       />
       <PasswordField
-        label="Parol"
+        label={t('auth.field.password')}
         name="password"
         value={form.password}
         onChange={onChange}
@@ -35,7 +36,7 @@ export default function LoginForm({
 
       <div className="flex items-center">
         <Checkbox name="remember" checked={remember} onChange={onRememberChange}>
-          Eslab qol
+          {t('auth.field.remember')}
         </Checkbox>
       </div>
 
@@ -43,9 +44,8 @@ export default function LoginForm({
         <div
           className="p-3 rounded-lg text-sm"
           style={{
-            background: 'var(--error-bg)',
-            border: '1px solid var(--error-border)',
-            color: 'var(--error)',
+            background: 'var(--bg-hover)',
+            color: 'var(--text)',
           }}
         >
           {serverError}
@@ -53,11 +53,7 @@ export default function LoginForm({
       )}
 
       <Button variant="primary" type="submit" disabled={loading} className="w-full mt-2">
-        {loading ? (
-          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        ) : (
-          'Kirish'
-        )}
+        {loading ? '...' : t('auth.btn.login')}
       </Button>
     </form>
   );

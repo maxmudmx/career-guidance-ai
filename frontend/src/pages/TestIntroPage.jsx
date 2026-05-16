@@ -1,34 +1,20 @@
 import { Button, Card } from '../components/ui';
+import { useTranslation } from '../contexts/LanguageContext';
 
-const STEPS = [
-  {
-    n: '1',
-    title: 'RIASEC psixometrik test',
-    desc: '30 ta savolga 1-5 ball oraliqda javob bering. Bu sizning qiziqish va xarakteringizni aniqlaydi.',
-    time: '~3 daqiqa',
-  },
-  {
-    n: '2',
-    title: "Akademik ma'lumotlar",
-    desc: "GPA, yosh, qiziqishlar, fanlardagi natijalaringiz va ko'nikmalaringizni kiriting.",
-    time: '~2 daqiqa',
-  },
-  {
-    n: '3',
-    title: 'AI tahlil va natija',
-    desc: '270+ kasb orasidan sizga eng mos top 3 ta kasb va 6 oylik o\'quv yo\'l xaritasi.',
-    time: 'Avtomatik',
-  },
-];
-
-const RULES = [
-  "Har bir savolga sidqidildan javob bering — \"to'g'ri\" yoki \"noto'g'ri\" javob yo'q.",
-  "Birinchi xayolingizga kelgan javobni tanlang, uzoq o'ylamang.",
-  "Natijalar saqlanadi va istalgan vaqt profilingizdan ko'rishingiz mumkin.",
-  "Testni qayta o'tkazib, taqqoslash mumkin.",
+const RULES_KEYS = [
+  'test_intro.rule1',
+  'test_intro.rule2',
+  'test_intro.rule3',
+  'test_intro.rule4',
 ];
 
 export default function TestIntroPage({ onStart }) {
+  const { t } = useTranslation();
+  const STEPS = [
+    { n: '1', title: t('test_intro.step1.title'), desc: t('test_intro.step1.desc'), time: t('test_intro.step1.time') },
+    { n: '2', title: t('test_intro.step2.title'), desc: t('test_intro.step2.desc'), time: t('test_intro.step2.time') },
+    { n: '3', title: t('test_intro.step3.title'), desc: t('test_intro.step3.desc'), time: t('test_intro.step3.time') },
+  ];
   return (
     <div
       className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 font-sans"
@@ -40,13 +26,13 @@ export default function TestIntroPage({ onStart }) {
             className="text-2xl sm:text-3xl font-bold mb-2"
             style={{ color: 'var(--text)', letterSpacing: '-0.02em' }}
           >
-            Kasb tanlash testi
+            {t('test_intro.title')}
           </h1>
           <p
             className="text-sm sm:text-base max-w-md mx-auto"
             style={{ color: 'var(--text-muted)' }}
           >
-            Sizga eng mos IT kasblarni topish uchun bir necha bosqichda javob beriladi.
+            {t('test_intro.subtitle')}
           </p>
 
           <div
@@ -57,13 +43,13 @@ export default function TestIntroPage({ onStart }) {
               color: 'var(--accent)',
             }}
           >
-            Umumiy: ~5 daqiqa
+            {t('test_intro.total_time')}
           </div>
         </div>
 
         <Card className="p-5 mb-6">
           <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--text)' }}>
-            Test bosqichlari
+            {t('test_intro.steps_title')}
           </h2>
           <div className="space-y-4">
             {STEPS.map((s) => (
@@ -95,21 +81,8 @@ export default function TestIntroPage({ onStart }) {
           </div>
         </Card>
 
-        <Card className="p-5 mb-6">
-          <h2 className="text-base font-semibold mb-4" style={{ color: 'var(--text)' }}>
-            Qoidalar
-          </h2>
-          <ul className="space-y-2.5">
-            {RULES.map((rule, i) => (
-              <li key={i} className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                · {rule}
-              </li>
-            ))}
-          </ul>
-        </Card>
-
         <Button variant="primary" size="lg" onClick={onStart} className="w-full">
-          Davom etish
+          {t('test_intro.btn.continue')}
         </Button>
       </div>
     </div>

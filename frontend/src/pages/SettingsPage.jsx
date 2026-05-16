@@ -1,17 +1,20 @@
 import { useState } from 'react';
 import { Card } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
+import { useTranslation } from '../contexts/LanguageContext';
+import { LANGUAGE_OPTIONS } from '../i18n/translations';
 
 
 export default function SettingsPage({ user, onLogout }) {
   const { theme, toggle } = useTheme();
+  const { lang, setLang, t } = useTranslation();
   const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-6" style={{ color: 'var(--text)' }}>
-          Sozlamalar
+          {t('settings.title')}
         </h1>
 
         {/* Theme toggle */}
@@ -19,13 +22,43 @@ export default function SettingsPage({ user, onLogout }) {
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                {theme === 'dark' ? 'Tungi rejim' : "Yorug' rejim"}
+                {theme === 'dark' ? t('settings.theme.dark_label') : t('settings.theme.light_label')}
               </div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {theme === 'dark' ? "Qorong'u mavzu yoniq" : "Yorug' mavzu yoniq"}
+                {theme === 'dark' ? t('settings.theme.dark_desc') : t('settings.theme.light_desc')}
               </div>
             </div>
             <Switch checked={theme === 'dark'} onChange={toggle} />
+          </div>
+        </Card>
+
+        {/* Language */}
+        <Card className="overflow-hidden mb-3">
+          <div className="flex items-center gap-4 px-5 py-4">
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+                {t('settings.language.label')}
+              </div>
+              <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {t('settings.language.desc')}
+              </div>
+            </div>
+            <div className="flex gap-1.5">
+              {LANGUAGE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.code}
+                  onClick={() => setLang(opt.code)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                  style={{
+                    background: lang === opt.code ? 'var(--text)' : 'var(--bg-hover)',
+                    color: lang === opt.code ? 'var(--bg)' : 'var(--text)',
+                  }}
+                  title={opt.label}
+                >
+                  {opt.flag}
+                </button>
+              ))}
+            </div>
           </div>
         </Card>
 
@@ -37,17 +70,17 @@ export default function SettingsPage({ user, onLogout }) {
           >
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                Ilova haqida
+                {t('settings.about.label')}
               </div>
               <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Versiya va qisqacha ma'lumot
+                {t('settings.about.desc')}
               </div>
             </div>
             <div
               className="text-xs font-medium px-3 py-1 rounded-lg"
               style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)' }}
             >
-              {aboutOpen ? "Yopish" : "Ko'rish"}
+              {aboutOpen ? t('settings.about.close') : t('settings.about.view')}
             </div>
           </button>
 
@@ -61,12 +94,11 @@ export default function SettingsPage({ user, onLogout }) {
                   Kasbim
                 </div>
                 <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  Versiya 3.0.0
+                  {t('settings.about.version')} 3.0.0
                 </div>
               </div>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Sun'iy intellekt asosida sizning shaxsiyatingiz, qiziqishlaringiz va
-                akademik natijalaringizga muvofiq eng mos kasblarni topib beruvchi tizim.
+                {t('settings.about.text')}
               </p>
             </div>
           )}
@@ -77,7 +109,7 @@ export default function SettingsPage({ user, onLogout }) {
           <Card className="overflow-hidden">
             <button
               onClick={() => {
-                if (confirm("Rostdan ham chiqishni xohlaysizmi?")) {
+                if (confirm(t('settings.logout.confirm'))) {
                   onLogout();
                 }
               }}
@@ -85,17 +117,17 @@ export default function SettingsPage({ user, onLogout }) {
             >
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
-                  Tizimdan chiqish
+                  {t('settings.logout.label')}
                 </div>
                 <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  @{user.username} hisobidan chiqib ketish
+                  {t('settings.logout.desc_prefix')}{user.username}{t('settings.logout.desc_suffix')}
                 </div>
               </div>
               <div
                 className="text-xs font-medium px-3 py-1 rounded-lg"
                 style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
               >
-                Chiqish
+                {t('settings.logout.btn')}
               </div>
             </button>
           </Card>
@@ -113,11 +145,16 @@ function Switch({ checked, onChange }) {
       role="switch"
       aria-checked={checked}
       className="relative w-12 h-7 rounded-full transition-colors flex-shrink-0"
-      style={{ background: checked ? 'var(--accent)' : 'var(--bg-hover)' }}
+      style={{
+        background: checked ? 'var(--text)' : 'var(--bg-hover)',
+      }}
     >
       <div
-        className="absolute top-1 w-5 h-5 rounded-full bg-white transition-all shadow"
-        style={{ left: checked ? '24px' : '4px' }}
+        className="absolute top-1 w-5 h-5 rounded-full transition-all"
+        style={{
+          left: checked ? '24px' : '4px',
+          background: checked ? 'var(--bg)' : 'var(--text)',
+        }}
       />
     </button>
   );

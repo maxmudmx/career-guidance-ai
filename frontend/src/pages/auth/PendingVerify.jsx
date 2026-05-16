@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button, Card } from '../../components/ui';
 import { authAPI, tokenStorage } from '../../services/api';
+import { useTranslation } from '../../contexts/LanguageContext';
 
 export default function PendingVerify({
   email,
@@ -10,6 +11,7 @@ export default function PendingVerify({
   onBack,
   onVerified,
 }) {
+  const { t } = useTranslation();
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState('');
@@ -69,7 +71,7 @@ export default function PendingVerify({
       onVerified?.(res.data?.user);
     } catch (err) {
       const detail = err.response?.data?.detail;
-      setError(typeof detail === 'string' ? detail : "Kod noto'g'ri yoki muddati tugagan");
+      setError(typeof detail === 'string' ? detail : t('verify.error'));
       setDigits(['', '', '', '', '', '']);
       inputsRef.current[0]?.focus();
     } finally {
@@ -86,12 +88,10 @@ export default function PendingVerify({
     <div className="w-full max-w-sm mx-auto">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-semibold mb-2" style={{ color: 'var(--text)' }}>
-          Tasdiqlash kodini kiriting
+          {t('verify.title')}
         </h2>
         <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {fromRegister
-            ? "Ro'yxatdan o'tdingiz! 6 raqamli kod yuborilgan manzil:"
-            : 'Emailingizni tasdiqlash uchun kod yuborilgan manzil:'}
+          {fromRegister ? t('verify.from_register') : t('verify.from_login')}
         </p>
         <p className="text-sm break-all mt-2 font-medium" style={{ color: 'var(--text)' }}>
           {email}
@@ -131,7 +131,7 @@ export default function PendingVerify({
         {resendState.sent && (
           <div className="mb-3 p-2.5 rounded-lg text-xs"
             style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}>
-            Yangi kod yuborildi
+            {t('verify.sent')}
           </div>
         )}
         {resendState.error && (
@@ -148,7 +148,7 @@ export default function PendingVerify({
           disabled={!isComplete || verifying}
           className="w-full mb-3"
         >
-          {verifying ? 'Tekshirilmoqda...' : 'Tasdiqlash'}
+          {verifying ? t('verify.btn.verifying') : t('verify.btn.verify')}
         </Button>
 
         <button
@@ -158,11 +158,11 @@ export default function PendingVerify({
           className="w-full text-xs hover:underline transition-colors disabled:opacity-50"
           style={{ color: 'var(--text-muted)' }}
         >
-          {resendState.loading ? 'Yuborilmoqda...' : "Kod kelmadimi? Qayta yuborish"}
+          {resendState.loading ? t('verify.btn.resending') : t('verify.btn.resend')}
         </button>
 
         <p className="text-xs mt-4 text-center" style={{ color: 'var(--text-faint)' }}>
-          Pochtangizni (Spam papkasini ham) tekshiring. Kod 15 daqiqa amal qiladi.
+          {t('verify.hint')}
         </p>
       </Card>
 
@@ -173,7 +173,7 @@ export default function PendingVerify({
           className="text-sm hover:underline transition-colors"
           style={{ color: 'var(--text-muted)' }}
         >
-          Kirish sahifasiga qaytish
+          {t('verify.btn.back')}
         </button>
       </div>
     </div>

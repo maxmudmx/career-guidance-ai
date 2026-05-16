@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { recommendAPI } from '../services/api';
+import { useTranslation } from '../contexts/LanguageContext';
 
 export default function ResultsPage({ riasecScores, academicData, onBack, onRetake }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [results, setResults] = useState([]);
@@ -31,7 +33,7 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
       })
       .catch((err) => {
         if (cancelled) return;
-        const msg = err?.response?.data?.detail || 'Xatolik yuz berdi';
+        const msg = err?.response?.data?.detail || t('common.error');
         setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
       })
       .finally(() => {
@@ -46,14 +48,14 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text)' }}>
-            Sizga eng mos kasblar
+            {t('results.title')}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            ML Recommender System tavsiyalari ({totalCareers || '…'} kasbdan top 5)
+            {t('results.subtitle_prefix')} ({totalCareers || '…'} {t('results.subtitle_suffix')})
           </p>
           {method && (
             <p className="text-xs mt-2 font-mono" style={{ color: 'var(--text-faint)' }}>
-              Algoritm: {method}
+              {t('results.algorithm_label')} {method}
             </p>
           )}
         </div>
@@ -61,7 +63,7 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
         {loading && (
           <div className="text-center py-16">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              ML model tavsiyalarni hisoblamoqda...
+              {t('results.loading')}
             </p>
           </div>
         )}
@@ -70,7 +72,7 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
           <Card className="p-6 text-center">
             <p className="text-sm mb-4" style={{ color: 'var(--text)' }}>{error}</p>
             <Button variant="primary" onClick={onRetake}>
-              Qaytadan urinish
+              {t('results.btn.retry')}
             </Button>
           </Card>
         )}
@@ -86,10 +88,10 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
         {!loading && (
           <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
             <Button variant="secondary" onClick={onBack}>
-              Orqaga
+              {t('results.btn.back')}
             </Button>
             <Button variant="primary" onClick={onRetake}>
-              Testni qaytadan topshirish
+              {t('results.btn.retake')}
             </Button>
           </div>
         )}
@@ -99,6 +101,7 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
 }
 
 function CareerResultCard({ rank, career }) {
+  const { t } = useTranslation();
   const confidence = Math.round(career.score * 100);
 
   return (
@@ -117,7 +120,7 @@ function CareerResultCard({ rank, career }) {
 
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs mb-1">
-          <span style={{ color: 'var(--text-muted)' }}>Mos kelish darajasi</span>
+          <span style={{ color: 'var(--text-muted)' }}>{t('results.match')}</span>
           <span className="font-bold" style={{ color: 'var(--accent)' }}>{confidence}%</span>
         </div>
         <div
