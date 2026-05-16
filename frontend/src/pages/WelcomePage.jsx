@@ -1,17 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Brain, TrendingUp, Target, CheckCircle, Zap,
-  AlertTriangle, HeartCrack, Clock, GraduationCap,
-  Activity, Briefcase, ShieldAlert, Users,
-} from 'lucide-react';
 import { Card } from '../components/ui';
 import { statsAPI } from '../services/api';
 
 const STEPS = [
-  { step: '01', title: 'Test topshiring', desc: '30 ta RIASEC savoliga javob bering', icon: Brain },
-  { step: '02', title: "Ma'lumot kiriting", desc: "Akademik va ko'nikmalaringizni baholang", icon: Target },
-  { step: '03', title: 'AI tahlil', desc: 'Eng mos kasblarni tanlaydi', icon: Zap },
-  { step: '04', title: 'Natija oling', desc: "To'liq yo'l xaritasi va tavsiyalar", icon: TrendingUp },
+  { step: '01', title: 'Test topshiring', desc: '30 ta RIASEC savoliga javob bering' },
+  { step: '02', title: "Ma'lumot kiriting", desc: "Akademik va ko'nikmalaringizni baholang" },
+  { step: '03', title: 'AI tahlil', desc: 'Eng mos kasblarni tanlaydi' },
+  { step: '04', title: 'Natija oling', desc: "To'liq yo'l xaritasi va tavsiyalar" },
 ];
 
 const BENEFITS = [
@@ -31,7 +26,6 @@ const PROBLEM_STATS = [
     suffix: '%',
     label: "yoshlar tanlagan kasbidan pushaymon",
     desc: "FlexJobs (2023) tadqiqotiga ko'ra, har 3 ta yoshdan 2 tasi tanlagan ish yo'lidan afsuslangan",
-    icon: HeartCrack,
     color: '#EF4444',
   },
   {
@@ -39,7 +33,6 @@ const PROBLEM_STATS = [
     suffix: '%',
     label: "global yoshlar ishsizligi",
     desc: "ILO 2024: 15-24 yoshdagilar orasida ishsizlik darajasi 3 baravar ko'p kattalardan",
-    icon: AlertTriangle,
     color: '#F59E0B',
   },
   {
@@ -47,7 +40,6 @@ const PROBLEM_STATS = [
     suffix: '%',
     label: "yoshlar NEET — ne ish, ne o'qish",
     desc: "Jahon Banki: yoshlarning chorak qismi ne ishlaydi, ne o'qiydi — boshi berk ko'chada",
-    icon: ShieldAlert,
     color: '#DC2626',
   },
   {
@@ -55,29 +47,24 @@ const PROBLEM_STATS = [
     suffix: ' yil',
     label: "noto'g'ri kasb uchun sarflangan",
     desc: "O'rtacha bitiruvchi 5-7 yilni boshqa sohaga o'tib qayta o'rganishga sarflaydi",
-    icon: Clock,
     color: '#7C3AED',
   },
 ];
 
 const CONSEQUENCES = [
   {
-    icon: HeartCrack,
     title: "Ruhiy salomatlik inqirozi",
     desc: "WHO: kasbsiz yoshlarda depressiya 2.5×, suiсid xavfi 40% yuqori. O'z-o'zini topa olmaslik — eng katta sabablardan biri.",
   },
   {
-    icon: ShieldAlert,
     title: "Jinoyatchilik o'sishi",
     desc: "BMT tadqiqoti: ishsiz yoshlarda jinoyatga aralashish ehtimoli 3-5 baravar yuqori. Boshi berk ko'cha — eng xavfli yo'l.",
   },
   {
-    icon: GraduationCap,
     title: "Bekor ketgan ta'lim",
     desc: "O'zbekistonda bitiruvchilarning ~60%i ixtisosiga mos ishlamaydi. Ota-ona pul, talaba 4-5 yil — bekor.",
   },
   {
-    icon: Briefcase,
     title: "Kasb almashtirish qiyinchiligi",
     desc: "30 yoshdan keyin kasb o'zgartirish 5× qiyinroq — vaqt, oila, moliya bog'lanib qoladi.",
   },
@@ -115,7 +102,7 @@ function useCountUp(target, duration = 1400) {
   return value;
 }
 
-function AppStatCard({ icon: Icon, value, label, color = 'var(--accent)', showLive = false }) {
+function AppStatCard({ value, label, color = 'var(--accent)', showLive = false }) {
   const n = useCountUp(typeof value === 'number' ? value : 0);
   return (
     <div
@@ -125,27 +112,19 @@ function AppStatCard({ icon: Icon, value, label, color = 'var(--accent)', showLi
         borderColor: 'var(--border)',
       }}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center"
-          style={{ background: `${color === 'var(--accent)' ? 'var(--accent-soft)' : color + '1F'}` }}
-        >
-          <Icon className="w-5 h-5" style={{ color }} />
-        </div>
-        {showLive && (
-          <span className="relative flex w-2 h-2 mt-1">
-            <span
-              className="absolute inline-flex w-full h-full rounded-full opacity-75 animate-ping"
-              style={{ background: color }}
-            />
-            <span
-              className="relative inline-flex w-2 h-2 rounded-full"
-              style={{ background: color }}
-            />
-          </span>
-        )}
-      </div>
-      <div className="text-3xl font-bold font-mono mb-1 tabular-nums" style={{ color: 'var(--text)' }}>
+      {showLive && (
+        <span className="absolute top-4 right-4 flex w-2 h-2">
+          <span
+            className="absolute inline-flex w-full h-full rounded-full opacity-75 animate-ping"
+            style={{ background: color }}
+          />
+          <span
+            className="relative inline-flex w-2 h-2 rounded-full"
+            style={{ background: color }}
+          />
+        </span>
+      )}
+      <div className="text-3xl font-bold font-mono mb-1 tabular-nums" style={{ color }}>
         {n.toLocaleString('en-US')}
       </div>
       <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -155,7 +134,7 @@ function AppStatCard({ icon: Icon, value, label, color = 'var(--accent)', showLi
   );
 }
 
-function ProblemStatCard({ icon: Icon, value, suffix, label, desc, color }) {
+function ProblemStatCard({ value, suffix, label, desc, color }) {
   const n = useCountUp(value);
   return (
     <div
@@ -169,13 +148,7 @@ function ProblemStatCard({ icon: Icon, value, suffix, label, desc, color }) {
         className="absolute top-0 left-0 right-0 h-1"
         style={{ background: color }}
       />
-      <div
-        className="w-11 h-11 rounded-lg flex items-center justify-center mb-4"
-        style={{ background: `${color}1F` }}
-      >
-        <Icon className="w-5 h-5" style={{ color }} />
-      </div>
-      <div className="text-4xl font-bold font-mono mb-1" style={{ color }}>
+      <div className="text-4xl font-bold font-mono mb-3 mt-2" style={{ color }}>
         {n}{suffix}
       </div>
       <div
@@ -263,7 +236,6 @@ export default function WelcomePage({ onStart }) {
               border: '1px solid var(--accent-border)',
             }}
           >
-            <LiveDot />
             <span style={{ color: 'var(--text)' }}>
               Hozir <strong>{activeNow}</strong> ta foydalanuvchi onlayn
             </span>
@@ -302,10 +274,6 @@ export default function WelcomePage({ onStart }) {
             }}
           >
             Testni boshlash
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="5" y1="12" x2="19" y2="12"/>
-              <polyline points="12 5 19 12 12 19"/>
-            </svg>
           </button>
         </div>
       </section>
@@ -322,7 +290,6 @@ export default function WelcomePage({ onStart }) {
                 border: '1px solid var(--accent-border)',
               }}
             >
-              <Activity className="w-3.5 h-3.5" />
               Kasbim hamjamiyati
             </div>
             <h2
@@ -337,31 +304,10 @@ export default function WelcomePage({ onStart }) {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <AppStatCard
-              icon={Users}
-              value={totalUsers}
-              label="Foydalanuvchilar"
-              color="var(--accent)"
-            />
-            <AppStatCard
-              icon={Zap}
-              value={activeNow}
-              label="Hozir onlayn"
-              color="#22C55E"
-              showLive
-            />
-            <AppStatCard
-              icon={CheckCircle}
-              value={totalTests}
-              label="Testlar o'tkazilgan"
-              color="var(--accent)"
-            />
-            <AppStatCard
-              icon={TrendingUp}
-              value={testsThisWeek}
-              label="Bu hafta testlar"
-              color="#7C3AED"
-            />
+            <AppStatCard value={totalUsers} label="Foydalanuvchilar" color="var(--accent)" />
+            <AppStatCard value={activeNow} label="Hozir onlayn" color="#22C55E" showLive />
+            <AppStatCard value={totalTests} label="Testlar o'tkazilgan" color="var(--accent)" />
+            <AppStatCard value={testsThisWeek} label="Bu hafta testlar" color="#7C3AED" />
           </div>
 
           {/* Mashhur kasblar va dominant tip */}
@@ -495,12 +441,6 @@ export default function WelcomePage({ onStart }) {
                     borderColor: 'var(--border)',
                   }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(239,68,68,0.12)' }}
-                  >
-                    <c.icon className="w-5 h-5" style={{ color: '#EF4444' }} />
-                  </div>
                   <div className="min-w-0">
                     <h4
                       className="text-sm font-semibold mb-1.5"
@@ -587,12 +527,6 @@ export default function WelcomePage({ onStart }) {
                   border: '1px solid var(--border)',
                 }}
               >
-                <div
-                  className="w-11 h-11 rounded-lg flex items-center justify-center"
-                  style={{ background: 'var(--accent-soft)' }}
-                >
-                  <item.icon className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-                </div>
                 <div className="font-semibold" style={{ color: 'var(--text)', fontSize: 17 }}>
                   {item.title}
                 </div>
@@ -637,10 +571,6 @@ export default function WelcomePage({ onStart }) {
 
             <Card className="p-8">
               <div className="text-center mb-6">
-                <Activity
-                  className="w-10 h-10 mx-auto mb-2"
-                  style={{ color: 'var(--accent)' }}
-                />
                 <h3 className="font-semibold" style={{ color: 'var(--text)' }}>
                   Ishonchli yondashuv
                 </h3>

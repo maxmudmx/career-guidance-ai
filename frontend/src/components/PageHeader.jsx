@@ -1,15 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
-
-/**
- * Sticky page header — boxed icon-only back button + title + optional decorative icon.
- *
- * Props:
- * - title:    page title (string, required)
- * - subtitle: optional subtitle below title
- * - onBack:   click handler for back button
- * - icon:     optional decorative Lucide icon component (rendered next to title in soft box)
- */
-export default function PageHeader({ title, subtitle, onBack, icon: Icon }) {
+export default function PageHeader({ title, subtitle, onBack }) {
   return (
     <div
       className="rounded-xl border flex items-center gap-3 px-4 py-4 mb-6"
@@ -19,16 +8,6 @@ export default function PageHeader({ title, subtitle, onBack, icon: Icon }) {
       }}
     >
       <BackButton onClick={onBack} />
-
-      {Icon && (
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--accent-soft)' }}
-        >
-          <Icon className="w-5 h-5" style={{ color: 'var(--accent)' }} />
-        </div>
-      )}
-
       <div className="min-w-0 flex-1">
         <h1
           className="text-lg sm:text-xl font-semibold truncate"
@@ -37,10 +16,7 @@ export default function PageHeader({ title, subtitle, onBack, icon: Icon }) {
           {title}
         </h1>
         {subtitle && (
-          <p
-            className="text-xs sm:text-sm truncate"
-            style={{ color: 'var(--text-muted)' }}
-          >
+          <p className="text-xs sm:text-sm truncate" style={{ color: 'var(--text-muted)' }}>
             {subtitle}
           </p>
         )}
@@ -49,9 +25,6 @@ export default function PageHeader({ title, subtitle, onBack, icon: Icon }) {
   );
 }
 
-/**
- * Boxed icon-only back button — used by PageHeader, but also exported for stand-alone use.
- */
 export function BackButton({ onClick, label = 'Orqaga' }) {
   return (
     <button
@@ -59,7 +32,7 @@ export function BackButton({ onClick, label = 'Orqaga' }) {
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="w-10 h-10 rounded-xl border flex items-center justify-center transition-colors flex-shrink-0"
+      className="px-3 py-2 rounded-xl border text-sm font-medium transition-colors flex-shrink-0"
       style={{
         background: 'var(--surface)',
         borderColor: 'var(--border)',
@@ -67,14 +40,12 @@ export function BackButton({ onClick, label = 'Orqaga' }) {
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = 'var(--bg-hover)';
-        e.currentTarget.style.borderColor = 'var(--border-strong)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = 'var(--surface)';
-        e.currentTarget.style.borderColor = 'var(--border)';
       }}
     >
-      <ArrowLeft className="w-5 h-5" />
+      {label}
     </button>
   );
 }

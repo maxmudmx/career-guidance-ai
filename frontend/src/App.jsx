@@ -3,10 +3,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  Brain, LogOut, Loader2, History, User, Sun, Moon,
-  Home, ClipboardList, Menu, X, Settings,
-} from 'lucide-react';
 import WelcomePage from './pages/WelcomePage';
 import AuthPage from './pages/AuthPage';
 import TestIntroPage from './pages/TestIntroPage';
@@ -17,18 +13,17 @@ import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import { authAPI, tokenStorage } from './services/api';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './index.css';
 
 
 function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
-  const { theme, toggle } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const NavLink = ({ icon: Icon, label, target, primary }) => (
+  const NavLink = ({ label, target, primary }) => (
     <button
       onClick={() => { onNavigate(target); setMenuOpen(false); }}
-      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
         route === target ? 'opacity-100' : 'opacity-70 hover:opacity-100'
       }`}
       style={{
@@ -38,7 +33,6 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
         color: primary ? 'white' : 'var(--text)',
       }}
     >
-      <Icon size={14} />
       {label}
     </button>
   );
@@ -52,76 +46,48 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
         <div className="flex justify-between items-center h-16">
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+            className="text-lg font-bold hover:opacity-80 transition-opacity"
+            style={{ color: 'var(--text)' }}
           >
-            <div
-              className="w-9 h-9 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}
-            >
-              <Brain className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>
-              Kasbim
-            </span>
+            Kasbim
           </button>
 
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                <NavLink icon={Home} label="Bosh sahifa" target="home" />
-                <NavLink icon={ClipboardList} label="Test" target="test" primary />
-                <NavLink icon={History} label="Tarix" target="history" />
-                <NavLink icon={User} label="Profil" target="profile" />
-                <NavLink icon={Settings} label="Sozlamalar" target="settings" />
-
-                <button
-                  onClick={toggle}
-                  className="p-2 rounded-lg hover:opacity-70 transition-opacity"
-                  style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-                  title={theme === 'dark' ? "Yorug' rejim" : "Tungi rejim"}
-                >
-                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                </button>
-
+                <NavLink label="Bosh sahifa" target="home" />
+                <NavLink label="Test" target="test" primary />
+                <NavLink label="Tarix" target="history" />
+                <NavLink label="Profil" target="profile" />
+                <NavLink label="Sozlamalar" target="settings" />
                 <button
                   onClick={onLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-70"
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-70"
                   style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-                  title="Chiqish"
                 >
-                  <LogOut size={14} />
                   Chiqish
                 </button>
               </>
             ) : (
-              <>
-                <button
-                  onClick={toggle}
-                  className="p-2 rounded-lg hover:opacity-70 transition-opacity"
-                  style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-                >
-                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                </button>
-                <button
-                  onClick={onStartTest}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                  style={{
-                    background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-                    color: 'white',
-                  }}
-                >
-                  Kirish / Ro'yxatdan o'tish
-                </button>
-              </>
+              <button
+                onClick={onStartTest}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+                  color: 'white',
+                }}
+              >
+                Kirish / Ro'yxatdan o'tish
+              </button>
             )}
           </div>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2 rounded-lg"
+            className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium"
             style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
           >
-            {menuOpen ? <X size={18} /> : <Menu size={18} />}
+            {menuOpen ? 'Yopish' : 'Menyu'}
           </button>
         </div>
 
@@ -132,25 +98,17 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           >
             {user ? (
               <>
-                <NavLink icon={Home} label="Bosh sahifa" target="home" />
-                <NavLink icon={ClipboardList} label="Test boshlash" target="test" />
-                <NavLink icon={History} label="Tarix" target="history" />
-                <NavLink icon={User} label="Profil" target="profile" />
-                <NavLink icon={Settings} label="Sozlamalar" target="settings" />
-                <button
-                  onClick={toggle}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100"
-                  style={{ color: 'var(--text)' }}
-                >
-                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                  {theme === 'dark' ? "Yorug' rejim" : "Tungi rejim"}
-                </button>
+                <NavLink label="Bosh sahifa" target="home" />
+                <NavLink label="Test boshlash" target="test" />
+                <NavLink label="Tarix" target="history" />
+                <NavLink label="Profil" target="profile" />
+                <NavLink label="Sozlamalar" target="settings" />
                 <button
                   onClick={onLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100"
+                  className="px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100 text-left"
                   style={{ color: 'var(--text)' }}
                 >
-                  <LogOut size={14} /> Chiqish
+                  Chiqish
                 </button>
               </>
             ) : (
@@ -198,7 +156,7 @@ function AppInner() {
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--accent)' }} />
+        <div className="text-sm" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</div>
       </div>
     );
   }

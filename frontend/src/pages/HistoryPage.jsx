@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-import {
-  History, Trash2, Sparkles, ArrowLeft, Loader2, AlertCircle, Calendar,
-} from 'lucide-react';
 import { Button, Card } from '../components/ui';
 import { userAPI } from '../services/api';
 
@@ -15,20 +12,20 @@ export default function HistoryPage({ onBack }) {
     setLoading(true);
     userAPI.getHistory()
       .then((res) => setHistory(res.data?.history || []))
-      .catch((err) => setError(err?.response?.data?.detail || 'Yuklab bo\'lmadi'))
+      .catch((err) => setError(err?.response?.data?.detail || "Yuklab bo'lmadi"))
       .finally(() => setLoading(false));
   };
 
   useEffect(load, []);
 
   const handleDelete = async (id) => {
-    if (!confirm('Bu test natijasini o\'chirishni xohlaysizmi?')) return;
+    if (!confirm("Bu test natijasini o'chirishni xohlaysizmi?")) return;
     setDeletingId(id);
     try {
       await userAPI.deleteHistory(id);
       setHistory((h) => h.filter((item) => item.id !== id));
     } catch (err) {
-      alert('O\'chirib bo\'lmadi: ' + (err?.response?.data?.detail || err.message));
+      alert("O'chirib bo'lmadi: " + (err?.response?.data?.detail || err.message));
     } finally {
       setDeletingId(null);
     }
@@ -46,39 +43,28 @@ export default function HistoryPage({ onBack }) {
   return (
     <div className="min-h-screen px-4 py-10 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <Button variant="secondary" onClick={onBack}>
-            <ArrowLeft size={16} /> Orqaga
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
-              <History className="inline w-6 h-6 mr-2" style={{ color: 'var(--accent)' }} />
-              Mening testlarim
-            </h1>
-            <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              Avvalgi test natijalaringiz va tavsiyalar
-            </p>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text)' }}>
+          Mening testlarim
+        </h1>
+        <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
+          Avvalgi test natijalaringiz va tavsiyalar
+        </p>
 
         {loading && (
-          <div className="flex flex-col items-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin mb-4" style={{ color: 'var(--accent)' }} />
+          <div className="text-center py-16">
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Yuklanmoqda...</p>
           </div>
         )}
 
         {!loading && error && (
           <Card className="p-6 text-center">
-            <AlertCircle className="w-8 h-8 mx-auto mb-3" style={{ color: '#DC2626' }} />
-            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>{error}</p>
+            <p className="text-sm mb-4" style={{ color: '#DC2626' }}>{error}</p>
             <Button variant="primary" onClick={load}>Qaytadan</Button>
           </Card>
         )}
 
         {!loading && !error && history.length === 0 && (
           <Card className="p-10 text-center">
-            <Sparkles className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--accent)' }} />
             <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--text)' }}>
               Hali test topshirmagansiz
             </h3>
@@ -118,25 +104,23 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between gap-4 mb-3">
-        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-faint)' }}>
-          <Calendar size={14} />
+        <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
           {formatDate(item.created_at)}
         </div>
         <button
           onClick={onDelete}
           disabled={isDeleting}
-          className="p-2 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-50"
+          className="text-xs px-2 py-1 rounded hover:opacity-70 transition-opacity disabled:opacity-50"
           style={{ background: 'var(--bg-hover)', color: '#DC2626' }}
-          title="O'chirish"
         >
-          {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+          {isDeleting ? "..." : "O'chirish"}
         </button>
       </div>
 
       {topCareer && (
         <div className="mb-3">
           <div className="text-xs uppercase font-semibold mb-1" style={{ color: 'var(--text-faint)' }}>
-            🥇 Eng yaxshi tavsiya
+            Eng yaxshi tavsiya
           </div>
           <div className="text-lg font-bold" style={{ color: 'var(--text)' }}>
             {topCareer.name_uz}

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Brain } from 'lucide-react';
 import { authAPI, tokenStorage } from '../services/api';
 import SignUpForm from './auth/SignUpForm';
 import LoginForm from './auth/LoginForm';
@@ -108,15 +107,6 @@ export default function AuthPage({ onAuth }) {
       />
       <div className="w-full max-w-sm relative z-10">
         <div className="text-center mb-8">
-          <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-5"
-            style={{
-              background: '#3B82F6',
-              boxShadow: '0 0 28px rgba(59,130,246,0.45)',
-            }}
-          >
-            <Brain className="w-7 h-7 text-white" />
-          </div>
           <h2
             className="text-3xl mb-2 font-bold"
             style={{ color: 'var(--text)', letterSpacing: '-0.02em' }}

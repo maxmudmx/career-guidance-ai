@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, ArrowLeft, Search, Heart, BookOpen, Calendar, Zap } from 'lucide-react';
 import { predictAPI } from '../services/api';
 import { Button, Card, ProgressBar } from '../components/ui';
 
@@ -210,12 +209,9 @@ export default function AcademicSkills({ onComplete, onBack }) {
           {/* Step 1 — Akademik */}
           {step === 1 && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Calendar className="w-5 h-5 text-[#2563EB]" />
-                <h2 className="text-2xl text-[#111827] font-semibold">
-                  Akademik ma'lumotlar
-                </h2>
-              </div>
+              <h2 className="text-2xl text-[#111827] font-semibold mb-2">
+                Akademik ma'lumotlar
+              </h2>
               <p className="text-[#4B5563] mb-8">
                 Yoshingiz va akademik ko'rsatkichlaringiz haqida ma'lumot bering
               </p>
@@ -268,12 +264,9 @@ export default function AcademicSkills({ onComplete, onBack }) {
           {/* Step 2 — Qiziqishlar */}
           {step === 2 && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Heart className="w-5 h-5 text-[#2563EB]" />
-                <h2 className="text-2xl text-[#111827] font-semibold">
-                  Qiziqishlaringiz
-                </h2>
-              </div>
+              <h2 className="text-2xl text-[#111827] font-semibold mb-2">
+                Qiziqishlaringiz
+              </h2>
               <p className="text-[#4B5563] mb-8">
                 Sizni qaysi sohalar qiziqtiradi? (kamida bittasini tanlang)
               </p>
@@ -299,12 +292,9 @@ export default function AcademicSkills({ onComplete, onBack }) {
           {/* Step 3 — Fanlar */}
           {step === 3 && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <BookOpen className="w-5 h-5 text-[#2563EB]" />
-                <h2 className="text-2xl text-[#111827] font-semibold">
-                  Yoqtirgan fanlaringiz
-                </h2>
-              </div>
+              <h2 className="text-2xl text-[#111827] font-semibold mb-2">
+                Yoqtirgan fanlaringiz
+              </h2>
               <p className="text-[#4B5563] mb-8">
                 Maktab/universitetda yoqtirgan fanlaringizni tanlang
               </p>
@@ -330,25 +320,21 @@ export default function AcademicSkills({ onComplete, onBack }) {
           {/* Step 4 — Ko'nikmalar */}
           {step === 4 && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="w-5 h-5 text-[#2563EB]" />
-                <h2 className="text-2xl text-[#111827] font-semibold">
-                  Ko'nikmalaringiz
-                </h2>
-              </div>
+              <h2 className="text-2xl text-[#111827] font-semibold mb-2">
+                Ko'nikmalaringiz
+              </h2>
               <p className="text-[#4B5563] mb-6">
                 Bilgan ko'nikmalaringizni tanlang va darajasini belgilang
               </p>
 
               {/* Search */}
-              <div className="relative mb-6">
-                <Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+              <div className="mb-6">
                 <input
                   type="text"
                   placeholder="Ko'nikma qidirish (Python, SQL, ...)"
                   value={skillFilter}
                   onChange={(e) => setSkillFilter(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2 bg-white border border-[#E5E7EB] rounded-lg
+                  className="w-full px-3 py-2 bg-white border border-[#E5E7EB] rounded-lg
                     focus:outline-none focus:ring-1 focus:ring-[#2563EB] focus:border-[#2563EB]
                     transition-colors text-[#111827] placeholder:text-[#9CA3AF]"
                 />
@@ -423,13 +409,11 @@ export default function AcademicSkills({ onComplete, onBack }) {
           {/* Navigation */}
           <div className="flex justify-between mt-10 pt-6 border-t border-[#E5E7EB]">
             <Button variant="ghost" onClick={handlePrev}>
-              <ArrowLeft className="w-4 h-4" />
               {step === 1 ? 'RIASEC testga' : 'Orqaga'}
             </Button>
 
             <Button variant="primary" onClick={handleNext} disabled={!canProceed()}>
               {step === totalSteps ? 'Tahlilni boshlash' : 'Davom etish'}
-              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </Card>

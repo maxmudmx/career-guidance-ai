@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, Keyboard, CheckCircle, Check } from 'lucide-react';
 import { Button, Card } from '../components/ui';
 
 const QUESTIONS = [
@@ -153,9 +152,6 @@ export default function RiasecTest({ onComplete, onBack }) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans">
         <div className="text-center">
-          <div className="w-16 h-16 bg-[#16A34A] rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="w-8 h-8 text-white" />
-          </div>
           <h2 className="text-2xl text-[#111827] mb-2 font-semibold">
             {category.name} bo'limi tugadi
           </h2>
@@ -203,7 +199,7 @@ export default function RiasecTest({ onComplete, onBack }) {
                   title={info.name}
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-medium transition-colors ${cls}`}
                 >
-                  {cat.completed ? <Check className="w-4 h-4" /> : cat.key}
+                  {cat.completed ? '✓' : cat.key}
                 </div>
               );
             })}
@@ -216,7 +212,6 @@ export default function RiasecTest({ onComplete, onBack }) {
         {onBack && currentQ === 0 && (
           <div className="mb-4">
             <Button variant="ghost" size="sm" onClick={onBack}>
-              <ArrowLeft className="w-4 h-4" />
               Bosh sahifaga
             </Button>
           </div>
@@ -273,7 +268,7 @@ export default function RiasecTest({ onComplete, onBack }) {
                     </div>
                     <span className="text-[#111827]">{opt.label}</span>
                   </div>
-                  {isSelected && <CheckCircle className="w-5 h-5 text-[#2563EB]" />}
+                  {isSelected && <span className="text-[#2563EB] text-lg">✓</span>}
                 </button>
               );
             })}
@@ -301,7 +296,6 @@ export default function RiasecTest({ onComplete, onBack }) {
                   setCurrentQ((q) => q - 1);
                 }}
               >
-                <ArrowLeft className="w-4 h-4" />
                 Orqaga
               </Button>
             ) : (
@@ -310,15 +304,13 @@ export default function RiasecTest({ onComplete, onBack }) {
 
             <Button variant="primary" onClick={goNext} disabled={!answered}>
               {currentQ === total - 1 ? 'Tugatish' : 'Keyingisi'}
-              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
 
           {/* Keyboard hint */}
           <div className="mt-6 pt-6 border-t border-[#E5E7EB]">
-            <div className="flex items-center gap-2 text-sm text-[#9CA3AF]">
-              <Keyboard className="w-4 h-4" />
-              <span>Klaviatura: 1–5 raqamlar — javob, Enter — keyingisi</span>
+            <div className="text-sm text-[#9CA3AF]">
+              Klaviatura: 1–5 raqamlar — javob, Enter — keyingisi
             </div>
           </div>
         </Card>

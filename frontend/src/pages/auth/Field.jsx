@@ -1,5 +1,4 @@
 import { memo, useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
 
 /**
  * Barqaror dark forma input — barcha uslublar CSS class orqali.
@@ -63,7 +62,7 @@ function PasswordFieldImpl({
           className="password-toggle"
           aria-label={show ? 'Parolni yashirish' : "Parolni ko'rish"}
         >
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+          {show ? "Yashir" : "Ko'rsat"}
         </button>
       </div>
       {error && <p className="field-error">{error}</p>}

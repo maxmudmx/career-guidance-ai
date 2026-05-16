@@ -1,4 +1,3 @@
-import { ChevronLeft } from 'lucide-react';
 import AuthIllustration from './AuthIllustration';
 
 /**
@@ -39,7 +38,7 @@ export default function AuthCard({ title, onBack, children, footer }) {
           aria-label="Orqaga"
           className="text-white/90 hover:text-white transition p-1 -ml-1 relative z-10"
         >
-          <ChevronLeft size={22} />
+          ←
         </button>
         <h1
           className="text-white text-2xl font-bold tracking-tight relative z-10"

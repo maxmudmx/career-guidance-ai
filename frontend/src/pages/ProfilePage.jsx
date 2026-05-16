@@ -1,9 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-  User, Mail, Eye, EyeOff, Lock, Camera, Edit3, Check, X,
-  MapPin, Calendar, ArrowLeft, Loader2, AlertCircle, CheckCircle,
-  Trash2, ClipboardCheck,
-} from 'lucide-react';
 import { Button, Card } from '../components/ui';
 import { userAPI, tokenStorage } from '../services/api';
 
@@ -33,9 +28,9 @@ function ImageViewer({ src, onClose }) {
       <button
         type="button"
         onClick={onClose}
-        className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full"
+        className="absolute top-4 right-4 px-3 py-1.5 text-sm text-white bg-white/10 hover:bg-white/20 rounded-lg"
       >
-        <X className="w-6 h-6" />
+        Yopish
       </button>
       <img
         src={src}
@@ -48,21 +43,19 @@ function ImageViewer({ src, onClose }) {
 }
 
 
-function ActionButton({ icon: Icon, label, onClick, disabled }) {
+function ActionButton({ label, onClick, disabled }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex-1 flex flex-col items-center gap-1.5 py-3.5 px-3 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+      className="flex-1 py-3.5 px-3 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 text-sm font-medium"
       style={{
         background: 'var(--surface)',
         border: '1px solid var(--border)',
+        color: 'var(--text)',
       }}
     >
-      <Icon size={22} style={{ color: 'var(--accent)' }} />
-      <span className="text-xs font-medium" style={{ color: 'var(--text)' }}>
-        {label}
-      </span>
+      {label}
     </button>
   );
 }
@@ -157,28 +150,21 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
     <div className="min-h-screen px-4 py-8 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-xl mx-auto">
 
-        {/* Tepa - back tugma */}
-        <div className="mb-6">
-          <Button variant="secondary" onClick={onBack}>
-            <ArrowLeft size={16} /> Orqaga
-          </Button>
-        </div>
-
         {/* Bildirishnomalar */}
         {success && (
-          <div className="mb-4 p-3 rounded-lg text-sm flex items-center gap-2"
+          <div className="mb-4 p-3 rounded-lg text-sm"
             style={{ background: 'var(--success-bg)', color: '#16A34A' }}>
-            <CheckCircle size={16} /> {success}
+            {success}
           </div>
         )}
         {error && (
-          <div className="mb-4 p-3 rounded-lg text-sm flex items-center gap-2"
+          <div className="mb-4 p-3 rounded-lg text-sm"
             style={{ background: 'var(--error-bg)', color: '#DC2626' }}>
-            <AlertCircle size={16} /> {error}
+            {error}
           </div>
         )}
 
-        {/* Avatar bo'limi (Telegram-style: avatar + ism + onlayn) */}
+        {/* Avatar bo'limi */}
         <div className="text-center mb-6">
           <div
             onClick={avatarSrc ? () => setViewerOpen(true) : undefined}
@@ -191,8 +177,8 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
               <span className="text-white text-4xl font-semibold">{initials}</span>
             )}
             {uploading && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-xs">
+                Yuklanmoqda...
               </div>
             )}
           </div>
@@ -206,7 +192,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           </p>
         </div>
 
-        {/* Tugmalar (Telegram-style: 2 ta yonma-yon) */}
+        {/* Tugmalar */}
         <div className="flex gap-3 mb-6">
           <input
             ref={fileInputRef}
@@ -216,33 +202,30 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
             className="hidden"
           />
           <ActionButton
-            icon={Camera}
             label="Rasm belgilash"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
           />
           <ActionButton
-            icon={Edit3}
             label="Axborotni tahrirlash"
             onClick={() => setEditModalOpen(true)}
           />
         </div>
 
-        {/* Avatar o'chirish tugmasi (rasm bor bo'lsa) */}
         {profile?.avatar_url && (
           <div className="mb-6 text-center">
             <button
               onClick={handleDeleteAvatar}
               disabled={uploading}
-              className="text-xs flex items-center gap-1.5 mx-auto opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
+              className="text-xs opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
               style={{ color: '#DC2626' }}
             >
-              <Trash2 size={12} /> Avatarni o'chirish
+              Avatarni o'chirish
             </button>
           </div>
         )}
 
-        {/* Ma'lumotlar (Telegram-style: surface card with rows) */}
+        {/* Ma'lumotlar */}
         <Card className="overflow-hidden">
           {profile?.full_name && (
             <ProfileRow label="To'liq ism" value={profile.full_name} />
@@ -350,30 +333,27 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
           </h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:opacity-70"
+            className="px-2 py-1 rounded-lg text-sm hover:opacity-70"
             style={{ color: 'var(--text-muted)' }}
           >
-            <X size={18} />
+            Yopish
           </button>
         </div>
 
         <form onSubmit={handleSave} className="p-5 space-y-3">
           <FormField
-            icon={User}
             label="To'liq ism"
             value={form.full_name}
             onChange={(v) => setForm({ ...form, full_name: v })}
             placeholder="Ismingiz va familiyangiz"
           />
           <FormField
-            icon={User}
             label="Username"
             value={form.username}
             onChange={(v) => setForm({ ...form, username: v })}
             placeholder="username"
           />
           <FormField
-            icon={Mail}
             label="Email"
             value={form.email}
             onChange={(v) => setForm({ ...form, email: v })}
@@ -381,14 +361,12 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
             type="email"
           />
           <FormField
-            icon={MapPin}
             label="Region"
             value={form.region}
             onChange={(v) => setForm({ ...form, region: v })}
             placeholder="Toshkent, Samarqand, ..."
           />
           <FormField
-            icon={Calendar}
             label="Tug'ilgan sana"
             value={form.date_of_birth}
             onChange={(v) => setForm({ ...form, date_of_birth: v })}
@@ -400,7 +378,6 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
               Parolni o'zgartirish uchun joriy parol va yangi parolni kiriting:
             </p>
             <FormField
-              icon={Lock}
               label="Joriy parol (parol/email/username o'zgarsa zarur)"
               value={form.current_password}
               onChange={(v) => setForm({ ...form, current_password: v })}
@@ -410,14 +387,14 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
                 <button
                   type="button"
                   onClick={() => setShowPwd(!showPwd)}
-                  className="p-1.5 opacity-60 hover:opacity-100"
+                  className="text-xs px-2 opacity-60 hover:opacity-100"
+                  style={{ color: 'var(--text-muted)' }}
                 >
-                  {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showPwd ? "Yashir" : "Ko'rsat"}
                 </button>
               }
             />
             <FormField
-              icon={Lock}
               label="Yangi parol"
               value={form.new_password}
               onChange={(v) => setForm({ ...form, new_password: v })}
@@ -431,7 +408,7 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
               Bekor qilish
             </Button>
             <Button variant="primary" type="submit" disabled={saving} className="flex-1">
-              {saving ? <Loader2 size={16} className="animate-spin" /> : <><Check size={16} /> Saqlash</>}
+              {saving ? "Saqlanmoqda..." : "Saqlash"}
             </Button>
           </div>
         </form>
@@ -441,24 +418,19 @@ function EditProfileModal({ profile, onClose, onSaved, onError }) {
 }
 
 
-function FormField({ icon: Icon, label, value, onChange, placeholder, type = 'text', trailing }) {
+function FormField({ label, value, onChange, placeholder, type = 'text', trailing }) {
   return (
     <div>
       <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>
         {label}
       </label>
       <div className="relative">
-        <Icon
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--text-muted)' }}
-        />
         <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-10 pr-10 py-2.5 rounded-lg text-sm outline-none border focus:border-blue-500"
+          className="w-full px-3 py-2.5 pr-16 rounded-lg text-sm outline-none border focus:border-blue-500"
           style={{
             background: 'var(--bg)',
             color: 'var(--text)',
@@ -466,7 +438,7 @@ function FormField({ icon: Icon, label, value, onChange, placeholder, type = 'te
           }}
         />
         {trailing && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+          <div className="absolute right-1 top-1/2 -translate-y-1/2">
             {trailing}
           </div>
         )}
