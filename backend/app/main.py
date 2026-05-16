@@ -50,9 +50,26 @@ def create_tables():
     """DB jadvallarini yaratish va sodda migration."""
     from sqlalchemy import text
     from app.database import engine, Base
+
+    # Eski email_verifications jadvalini faqat eski sxemada bo'lsa (token ustuni bilan) tozalash
+    # Yangi sxemada `code` ustuni bo'ladi. Bir martalik migration.
+    with engine.begin() as conn:
+        try:
+            has_code = conn.execute(text(
+                "SELECT 1 FROM information_schema.columns "
+                "WHERE table_name='email_verifications' AND column_name='code'"
+            )).fetchone()
+            if not has_code:
+                # Jadval mavjud emas yoki eski 'token' sxemada — tozalaymiz
+                conn.execute(text("DROP TABLE IF EXISTS email_verifications CASCADE"))
+                logging.info("Eski email_verifications jadvali tozalandi (token → code migratsiya)")
+        except Exception as e:
+            logging.warning("email_verifications migration check: %s", e)
+
+    # Endi jadvallarni yaratamiz (email_verifications yangi sxemada)
     Base.metadata.create_all(bind=engine)
 
-    # Mavjud users jadvaliga yangi ustunlarni qo'shish (idempotent)
+    # users jadvaliga yangi ustunlarni qo'shish (idempotent)
     with engine.begin() as conn:
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500)"
@@ -66,7 +83,7 @@ def create_tables():
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE"
         ))
-        # Mavjud foydalanuvchilarni grandfather qilish (1 daqiqa avval yaratilganlar) — verified deb belgilash
+        # Mavjud foydalanuvchilarni grandfather qilish (1 daqiqa avval yaratilganlar)
         conn.execute(text(
             "UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"
         ))
