@@ -17,3 +17,6 @@ numpy==1.26.4
 scipy==1.13.1
 joblib==1.4.2
 scikit-surprise==1.1.4
+# Vizualizatsiya (analysis va notebook'lar uchun)
+matplotlib==3.10.9
+seaborn==0.13.2
