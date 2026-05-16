@@ -7,6 +7,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,20 +39,35 @@ app.include_router(prediction.router)
 app.include_router(users.router)
 
 
+# Static fayllar (avatarlar)
+_static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+os.makedirs(os.path.join(_static_dir, "avatars"), exist_ok=True)
+app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+
 @app.on_event("startup")
 def create_tables():
+    """DB jadvallarini yaratish va sodda migration."""
+    from sqlalchemy import text
     from app.database import engine, Base
     Base.metadata.create_all(bind=engine)
+
+    # Mavjud users jadvaliga yangi ustunlarni qo'shish (idempotent)
+    with engine.begin() as conn:
+        conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500)"
+        ))
+        conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS region VARCHAR(100)"
+        ))
+        conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE"
+        ))
 
 
 @app.on_event("startup")
 def ensure_ml_model():
-    """Agar ML model fayli yo'q bo'lsa, faqat Content-Based modelni tezda tayyorlash.
-
-    To'liq pipeline (5 model + alpha tuning) yarim daqiqa o'rniga 5-7 daqiqa oladi —
-    bu startup'ni bloklaydi va Render port ochilishini kutib timeout qiladi.
-    Shuning uchun bu yerda faqat production'da kerak bo'lgan CB modelni saqlaymiz.
-    """
+    """Agar ML model fayli yo'q bo'lsa, Content-Based modelni tezda tayyorlash."""
     from pathlib import Path
     import joblib
     model_path = Path(__file__).parent / "ml" / "saved" / "content_based.pkl"
@@ -61,7 +77,7 @@ def ensure_ml_model():
     try:
         from app.ml.content_based import ContentBasedRecommender
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        cb = ContentBasedRecommender().fit()  # tez — faqat career feature matritsani quradi
+        cb = ContentBasedRecommender().fit()
         joblib.dump(cb, model_path)
         logging.info("CB model saqlandi: %s", model_path)
     except Exception as e:
@@ -75,11 +91,6 @@ def root():
         "version": "3.0.0",
         "description": "ML Recommender System for Career Guidance",
         "docs": "/docs",
-        "endpoints": {
-            "auth": "/api/auth",
-            "test": "/api/test",
-            "predict": "/api/predict",
-        },
     }
 
 

@@ -1,21 +1,209 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  User, Mail, Calendar, Lock, ArrowLeft, ClipboardCheck,
-  AlertCircle, CheckCircle, Loader2, Eye, EyeOff,
+  User, Mail, Eye, EyeOff, Lock, Camera, Edit3, Check, X,
+  MapPin, Calendar, ArrowLeft, Loader2, AlertCircle, CheckCircle,
+  Trash2, ClipboardCheck,
 } from 'lucide-react';
 import { Button, Card } from '../components/ui';
-import { userAPI } from '../services/api';
+import { userAPI, tokenStorage } from '../services/api';
 
-export default function ProfilePage({ user, onBack }) {
-  const [stats, setStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(true);
+
+function AvatarLarge({ avatarUrl, username, onClick, uploading }) {
+  const initials = (username || 'U').slice(0, 2).toUpperCase();
+  const STATIC_BASE =
+    import.meta.env.VITE_STATIC_URL ||
+    (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:8000');
+
+  const src = avatarUrl
+    ? avatarUrl.startsWith('blob:') || avatarUrl.startsWith('http')
+      ? avatarUrl
+      : `${STATIC_BASE}${avatarUrl}`
+    : null;
+
+  return (
+    <div
+      onClick={src ? onClick : undefined}
+      className={`relative w-32 h-32 rounded-full flex items-center justify-center overflow-hidden mx-auto ${src ? 'cursor-pointer' : ''}`}
+      style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}
+      title={src ? "Rasmni katta ko'rish" : ''}
+    >
+      {src ? (
+        <img src={src} alt="avatar" className="w-full h-full object-cover" />
+      ) : (
+        <span className="text-white text-4xl font-semibold">{initials}</span>
+      )}
+      {uploading && (
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+          <Loader2 className="w-7 h-7 text-white animate-spin" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+function ImageViewer({ src, onClose }) {
+  return (
+    <div
+      className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors"
+      >
+        <X className="w-6 h-6" />
+      </button>
+      <img
+        src={src}
+        alt="avatar"
+        className="max-w-full max-h-full object-contain rounded-lg"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+
+export default function ProfilePage({ user: initialUser, onBack, onUserUpdate }) {
+  const [profile, setProfile] = useState(initialUser);
+  const [editMode, setEditMode] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const fileInputRef = useRef(null);
+
+  // Forma maydonlari
+  const [form, setForm] = useState({
+    full_name: '',
+    region: '',
+    date_of_birth: '',
+    email: '',
+    username: '',
+    new_password: '',
+    current_password: '',
+  });
+  const [showPwd, setShowPwd] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    userAPI.getStats()
-      .then((res) => setStats(res.data))
-      .catch(() => {})
-      .finally(() => setStatsLoading(false));
+    userAPI.getProfile()
+      .then((res) => {
+        setProfile(res.data);
+        setForm({
+          full_name: res.data.full_name || '',
+          region: res.data.region || '',
+          date_of_birth: res.data.date_of_birth || '',
+          email: res.data.email || '',
+          username: res.data.username || '',
+          new_password: '',
+          current_password: '',
+        });
+      })
+      .catch(() => {});
   }, []);
+
+  const showSuccess = (msg) => {
+    setSuccess(msg);
+    setError('');
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const showError = (msg) => {
+    setError(msg);
+    setSuccess('');
+  };
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showError("Rasm hajmi 5 MB dan oshmasligi kerak");
+      return;
+    }
+    setUploading(true);
+    setError('');
+    try {
+      const res = await userAPI.uploadAvatar(file);
+      setProfile((p) => ({ ...p, avatar_url: res.data.avatar_url }));
+      onUserUpdate?.({ ...profile, avatar_url: res.data.avatar_url });
+      showSuccess("Avatar muvaffaqiyatli yangilandi");
+    } catch (err) {
+      showError(err?.response?.data?.detail || "Avatar yuklab bo'lmadi");
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!profile?.avatar_url) return;
+    if (!confirm("Avatarni o'chirishni xohlaysizmi?")) return;
+    setUploading(true);
+    try {
+      await userAPI.deleteAvatar();
+      setProfile((p) => ({ ...p, avatar_url: null }));
+      onUserUpdate?.({ ...profile, avatar_url: null });
+      showSuccess("Avatar o'chirildi");
+    } catch (err) {
+      showError("O'chirib bo'lmadi");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const payload = {};
+    if (form.full_name !== (profile?.full_name || '')) payload.full_name = form.full_name;
+    if (form.region !== (profile?.region || '')) payload.region = form.region;
+    if (form.date_of_birth !== (profile?.date_of_birth || '')) payload.date_of_birth = form.date_of_birth;
+    if (form.email !== profile?.email) payload.email = form.email;
+    if (form.username !== profile?.username) payload.username = form.username;
+    if (form.new_password) payload.new_password = form.new_password;
+    if (form.current_password) payload.current_password = form.current_password;
+
+    if (Object.keys(payload).length === 0) {
+      setEditMode(false);
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await userAPI.editProfile(payload);
+      const updatedUser = res.data.user;
+      setProfile((p) => ({ ...p, ...updatedUser }));
+      onUserUpdate?.(updatedUser);
+      if (res.data.access_token) {
+        tokenStorage.set(res.data.access_token);
+      }
+      setEditMode(false);
+      setForm((f) => ({ ...f, new_password: '', current_password: '' }));
+      showSuccess("Profil yangilandi");
+    } catch (err) {
+      showError(err?.response?.data?.detail || "Saqlab bo'lmadi");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setError('');
+    setForm({
+      full_name: profile?.full_name || '',
+      region: profile?.region || '',
+      date_of_birth: profile?.date_of_birth || '',
+      email: profile?.email || '',
+      username: profile?.username || '',
+      new_password: '',
+      current_password: '',
+    });
+  };
 
   const formatDate = (iso) => {
     if (!iso) return '—';
@@ -24,77 +212,213 @@ export default function ProfilePage({ user, onBack }) {
     });
   };
 
+  const STATIC_BASE =
+    import.meta.env.VITE_STATIC_URL ||
+    (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:8000');
+
+  const fullAvatarUrl = profile?.avatar_url
+    ? profile.avatar_url.startsWith('blob:') || profile.avatar_url.startsWith('http')
+      ? profile.avatar_url
+      : `${STATIC_BASE}${profile.avatar_url}`
+    : null;
+
   return (
     <div className="min-h-screen px-4 py-10 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-2xl mx-auto">
-        <Button variant="secondary" onClick={onBack} className="mb-6">
-          <ArrowLeft size={16} /> Orqaga
-        </Button>
+        {/* Tepa - back + edit tugma */}
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="secondary" onClick={onBack}>
+            <ArrowLeft size={16} /> Orqaga
+          </Button>
+          {!editMode ? (
+            <Button variant="primary" onClick={() => setEditMode(true)}>
+              <Edit3 size={16} /> Ma'lumotlarni tahrirlash
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={handleCancelEdit} disabled={saving}>
+                <X size={16} /> Bekor qilish
+              </Button>
+              <Button variant="primary" onClick={handleSave} disabled={saving}>
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} Saqlash
+              </Button>
+            </div>
+          )}
+        </div>
 
-        {/* Avatar va asosiy ma'lumot */}
-        <Card className="p-8 mb-6 text-center">
+        {/* Bildirishnomalar */}
+        {success && (
           <div
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-bold"
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-              color: 'white',
-            }}
+            className="mb-4 p-3 rounded-lg text-sm flex items-center gap-2"
+            style={{ background: 'var(--success-bg)', color: '#16A34A' }}
           >
-            {(user?.username || 'U').slice(0, 2).toUpperCase()}
+            <CheckCircle size={16} /> {success}
           </div>
+        )}
+        {error && (
+          <div
+            className="mb-4 p-3 rounded-lg text-sm flex items-center gap-2"
+            style={{ background: 'var(--error-bg)', color: '#DC2626' }}
+          >
+            <AlertCircle size={16} /> {error}
+          </div>
+        )}
+
+        {/* Avatar + asosiy ma'lumot */}
+        <Card className="p-8 mb-6 text-center">
+          <AvatarLarge
+            avatarUrl={profile?.avatar_url}
+            username={profile?.username}
+            onClick={() => fullAvatarUrl && setViewerOpen(true)}
+            uploading={uploading}
+          />
+
+          {/* Avatar tugmalari */}
+          <div className="flex justify-center gap-2 mt-4 mb-4">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
+              style={{ background: 'var(--accent-soft)', color: 'var(--accent)' }}
+            >
+              <Camera size={14} /> Rasm yuklash
+            </button>
+            {profile?.avatar_url && (
+              <button
+                onClick={handleDeleteAvatar}
+                disabled={uploading}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ background: 'var(--bg-hover)', color: '#DC2626' }}
+              >
+                <Trash2 size={14} /> O'chirish
+              </button>
+            )}
+          </div>
+
           <h1 className="text-2xl font-bold mb-1" style={{ color: 'var(--text)' }}>
-            {user?.full_name || user?.username}
+            {profile?.full_name || profile?.username}
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            @{user?.username}
+            @{profile?.username}
           </p>
         </Card>
 
-        {/* Ma'lumotlar */}
-        <Card className="p-6 mb-6">
+        {/* Ma'lumotlar yoki tahrirlash formasi */}
+        <Card className="p-6">
           <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text)' }}>
-            Akkaunt ma'lumotlari
+            {editMode ? "Ma'lumotlarni tahrirlash" : "Shaxsiy ma'lumotlar"}
           </h2>
-          <div className="space-y-3">
-            <InfoRow icon={Mail} label="Email" value={user?.email} />
-            <InfoRow
-              icon={User}
-              label="Username"
-              value={`@${user?.username}`}
-            />
-            <InfoRow
-              icon={Calendar}
-              label="Ro'yxatdan o'tilgan"
-              value={formatDate(stats?.joined_at || user?.created_at)}
-            />
-            <InfoRow
-              icon={ClipboardCheck}
-              label="Topshirilgan testlar"
-              value={
-                statsLoading
-                  ? '...'
-                  : `${stats?.total_tests || 0} ta`
-              }
-            />
-          </div>
+
+          {!editMode ? (
+            <div className="space-y-1">
+              <InfoRow icon={User} label="To'liq ism" value={profile?.full_name} />
+              <InfoRow icon={Mail} label="Email" value={profile?.email} />
+              <InfoRow icon={MapPin} label="Region" value={profile?.region} />
+              <InfoRow icon={Calendar} label="Tug'ilgan sana" value={formatDate(profile?.date_of_birth)} />
+              <InfoRow icon={Calendar} label="Ro'yxatdan o'tilgan" value={formatDate(profile?.created_at)} />
+              {profile?.stats && (
+                <InfoRow
+                  icon={ClipboardCheck}
+                  label="Topshirilgan testlar"
+                  value={`${profile.stats.test_count || 0} ta`}
+                />
+              )}
+            </div>
+          ) : (
+            <form onSubmit={handleSave} className="space-y-3">
+              <FormField
+                icon={User}
+                label="To'liq ism"
+                value={form.full_name}
+                onChange={(v) => setForm({ ...form, full_name: v })}
+                placeholder="Ismingiz va familiyangiz"
+              />
+              <FormField
+                icon={User}
+                label="Username"
+                value={form.username}
+                onChange={(v) => setForm({ ...form, username: v })}
+                placeholder="username"
+              />
+              <FormField
+                icon={Mail}
+                label="Email"
+                value={form.email}
+                onChange={(v) => setForm({ ...form, email: v })}
+                placeholder="email@example.com"
+                type="email"
+              />
+              <FormField
+                icon={MapPin}
+                label="Region"
+                value={form.region}
+                onChange={(v) => setForm({ ...form, region: v })}
+                placeholder="Toshkent, Samarqand, ..."
+              />
+              <FormField
+                icon={Calendar}
+                label="Tug'ilgan sana"
+                value={form.date_of_birth}
+                onChange={(v) => setForm({ ...form, date_of_birth: v })}
+                type="date"
+              />
+
+              <div className="pt-3 border-t" style={{ borderColor: 'var(--border)' }}>
+                <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                  Parolni o'zgartirish uchun joriy parol va yangi parolni kiriting:
+                </p>
+                <FormField
+                  icon={Lock}
+                  label="Joriy parol"
+                  value={form.current_password}
+                  onChange={(v) => setForm({ ...form, current_password: v })}
+                  placeholder="Joriy parol"
+                  type={showPwd ? 'text' : 'password'}
+                  trailing={
+                    <button
+                      type="button"
+                      onClick={() => setShowPwd(!showPwd)}
+                      className="p-1.5 opacity-60 hover:opacity-100"
+                    >
+                      {showPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+                    </button>
+                  }
+                />
+                <FormField
+                  icon={Lock}
+                  label="Yangi parol"
+                  value={form.new_password}
+                  onChange={(v) => setForm({ ...form, new_password: v })}
+                  placeholder="Yangi parol (kamida 6 belgi)"
+                  type={showPwd ? 'text' : 'password'}
+                />
+              </div>
+            </form>
+          )}
         </Card>
 
-        {/* Parolni o'zgartirish */}
-        <Card className="p-6">
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--text)' }}>
-            <Lock size={18} style={{ color: 'var(--accent)' }} />
-            Parolni o'zgartirish
-          </h2>
-          <ChangePasswordForm />
-        </Card>
+        {viewerOpen && fullAvatarUrl && (
+          <ImageViewer src={fullAvatarUrl} onClose={() => setViewerOpen(false)} />
+        )}
       </div>
     </div>
   );
 }
 
+
 function InfoRow({ icon: Icon, label, value }) {
   return (
-    <div className="flex items-start gap-3 py-2 border-b last:border-b-0" style={{ borderColor: 'var(--border)' }}>
+    <div
+      className="flex items-start gap-3 py-2.5 border-b last:border-b-0"
+      style={{ borderColor: 'var(--border)' }}
+    >
       <div
         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
         style={{ background: 'var(--accent-soft)' }}
@@ -113,117 +437,37 @@ function InfoRow({ icon: Icon, label, value }) {
   );
 }
 
-function ChangePasswordForm() {
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
-  const [confirm, setConfirm] = useState('');
-  const [showPwd, setShowPwd] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccess(false);
-
-    if (next.length < 6) {
-      setError('Yangi parol kamida 6 ta belgi');
-      return;
-    }
-    if (next !== confirm) {
-      setError('Yangi parol va tasdiqlash mos kelmadi');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await userAPI.changePassword(current, next);
-      setSuccess(true);
-      setCurrent('');
-      setNext('');
-      setConfirm('');
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
-      setError(err?.response?.data?.detail || 'Xatolik yuz berdi');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function FormField({ icon: Icon, label, value, onChange, placeholder, type = 'text', trailing }) {
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <PasswordInput
-        placeholder="Joriy parol"
-        value={current}
-        onChange={(e) => setCurrent(e.target.value)}
-        show={showPwd}
-        onToggleShow={() => setShowPwd(!showPwd)}
-      />
-      <PasswordInput
-        placeholder="Yangi parol (kamida 6 belgi)"
-        value={next}
-        onChange={(e) => setNext(e.target.value)}
-        show={showPwd}
-      />
-      <PasswordInput
-        placeholder="Yangi parolni tasdiqlang"
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
-        show={showPwd}
-      />
-
-      {error && (
-        <div className="p-2.5 rounded-lg text-xs flex items-center gap-2"
-          style={{ background: 'var(--error-bg)', color: '#DC2626' }}>
-          <AlertCircle size={14} /> {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="p-2.5 rounded-lg text-xs flex items-center gap-2"
-          style={{ background: 'var(--success-bg)', color: '#16A34A' }}>
-          <CheckCircle size={14} /> Parol muvaffaqiyatli o'zgartirildi
-        </div>
-      )}
-
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={loading || !current || !next || !confirm}
-        className="w-full"
-      >
-        {loading ? <Loader2 size={16} className="animate-spin" /> : 'Parolni saqlash'}
-      </Button>
-    </form>
-  );
-}
-
-function PasswordInput({ placeholder, value, onChange, show, onToggleShow }) {
-  return (
-    <div className="relative">
-      <input
-        type={show ? 'text' : 'password'}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="w-full px-4 py-2.5 pr-10 rounded-lg text-sm outline-none border focus:border-blue-500"
-        style={{
-          background: 'var(--surface)',
-          color: 'var(--text)',
-          borderColor: 'var(--border)',
-        }}
-      />
-      {onToggleShow && (
-        <button
-          type="button"
-          onClick={onToggleShow}
-          className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded hover:opacity-70"
+    <div>
+      <label className="text-xs font-semibold mb-1 block" style={{ color: 'var(--text-muted)' }}>
+        {label}
+      </label>
+      <div className="relative">
+        <Icon
+          size={16}
+          className="absolute left-3 top-1/2 -translate-y-1/2"
           style={{ color: 'var(--text-muted)' }}
-        >
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
-        </button>
-      )}
+        />
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full pl-10 pr-10 py-2.5 rounded-lg text-sm outline-none border focus:border-blue-500"
+          style={{
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            borderColor: 'var(--border)',
+          }}
+        />
+        {trailing && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-muted)' }}>
+            {trailing}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -278,7 +278,11 @@ function AppInner() {
       )}
 
       {route === 'profile' && user && (
-        <ProfilePage user={user} onBack={() => setRoute('home')} />
+        <ProfilePage
+          user={user}
+          onBack={() => setRoute('home')}
+          onUserUpdate={(updated) => setUser((u) => ({ ...u, ...updated }))}
+        />
       )}
 
       {route === 'test' && user && (

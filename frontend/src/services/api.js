@@ -95,13 +95,36 @@ export const recommendAPI = {
 // ============================================================
 
 export const userAPI = {
+  /** Joriy foydalanuvchi profilini olish (stats bilan) */
+  getProfile: () => api.get('/users/me'),
+
+  /** Profilni tahrirlash (bir nechta maydon birga) */
+  editProfile: (payload) => api.post('/users/edit-profile', payload),
+
+  /** Avatar rasm yuklash */
+  uploadAvatar: (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return api.post('/users/upload-avatar', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  /** Avatarni o'chirish */
+  deleteAvatar: () => api.delete('/users/delete-avatar'),
+
+  /** Tarix */
   getHistory: () => api.get('/users/history'),
   deleteHistory: (testId) => api.delete(`/users/history/${testId}`),
+
+  /** Parol */
   changePassword: (currentPassword, newPassword) =>
     api.post('/users/change-password', {
       current_password: currentPassword,
       new_password: newPassword,
     }),
+
+  /** Stats (qisqacha) */
   getStats: () => api.get('/users/stats'),
 };
 
