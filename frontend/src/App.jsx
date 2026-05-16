@@ -115,9 +115,8 @@ function LiveBanner({ user, onLogout, onProfile, onSettings, onTestStart, onHist
     <nav
       className="sticky top-0 z-50 font-sans"
       style={{
-        background: 'var(--bg-glass)',
+        background: 'var(--bg)',
         borderBottom: '1px solid var(--border)',
-        backdropFilter: 'blur(12px)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
