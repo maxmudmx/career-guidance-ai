@@ -3,8 +3,6 @@ import { Brain } from 'lucide-react';
 import { authAPI, tokenStorage } from '../services/api';
 import SignUpForm from './auth/SignUpForm';
 import LoginForm from './auth/LoginForm';
-import PendingVerify from './auth/PendingVerify';
-import ForgotPasswordModal from './auth/ForgotPasswordModal';
 import { Card } from '../components/ui';
 
 function isValidEmail(email) {
@@ -38,10 +36,6 @@ export default function AuthPage({ onAuth }) {
   const [agreed, setAgreed] = useState(false);
   const [remember, setRemember] = useState(true);
 
-  const [pendingVerify, setPendingVerify] = useState(null);
-  const [resendState, setResendState] = useState({ loading: false, sent: false, error: '' });
-  const [forgotOpen, setForgotOpen] = useState(false);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
@@ -57,22 +51,6 @@ export default function AuthPage({ onAuth }) {
     setAgreed(false);
   };
 
-  const handleResend = async () => {
-    if (!pendingVerify?.email) return;
-    setResendState({ loading: true, sent: false, error: '' });
-    try {
-      await authAPI.resendVerification(pendingVerify.email);
-      setResendState({ loading: false, sent: true, error: '' });
-    } catch (err) {
-      const detail = err.response?.data?.detail;
-      setResendState({
-        loading: false,
-        sent: false,
-        error: typeof detail === 'string' ? detail : "Birozdan keyin urinib ko'ring.",
-      });
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validate = mode === 'signup' ? validateRegister : validateLogin;
@@ -85,33 +63,20 @@ export default function AuthPage({ onAuth }) {
     setLoading(true);
     setServerError('');
     try {
-      if (mode === 'signup') {
-        const res = await authAPI.register({
-          username: form.username,
-          email: form.email,
-          password: form.password,
-          full_name: form.username,
-        });
-        setPendingVerify({ email: res.data.email || form.email, fromRegister: true });
-        setResendState({ loading: false, sent: false, error: '' });
-      } else {
-        const res = await authAPI.login({ username: form.username, password: form.password });
-        tokenStorage.set(res.data.access_token);
-        tokenStorage.setUser(res.data.user);
-        onAuth(res.data.user, res.data.access_token);
-      }
+      const res = mode === 'signup'
+        ? await authAPI.register({
+            username: form.username,
+            email: form.email,
+            password: form.password,
+            full_name: form.username,
+          })
+        : await authAPI.login({ username: form.username, password: form.password });
+
+      tokenStorage.set(res.data.access_token);
+      tokenStorage.setUser(res.data.user);
+      onAuth(res.data.user, res.data.access_token);
     } catch (err) {
       const detail = err.response?.data?.detail;
-      if (
-        err.response?.status === 403 &&
-        detail &&
-        typeof detail === 'object' &&
-        detail.code === 'email_not_verified'
-      ) {
-        setPendingVerify({ email: detail.email, fromRegister: false });
-        setResendState({ loading: false, sent: false, error: '' });
-        return;
-      }
       const msg = Array.isArray(detail)
         ? detail.map((d) => d.msg).join(', ')
         : (typeof detail === 'string' ? detail : detail?.message) ||
@@ -122,39 +87,13 @@ export default function AuthPage({ onAuth }) {
     }
   };
 
-  /* ── Email tasdiqlash kutilayotgan ekran ── */
-  if (pendingVerify) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6 py-12 font-sans">
-        <PendingVerify
-          email={pendingVerify.email}
-          fromRegister={pendingVerify.fromRegister}
-          resendState={resendState}
-          onResend={handleResend}
-          onVerified={(user) => {
-            setPendingVerify(null);
-            if (user) onAuth(user);
-          }}
-          onBack={() => {
-            setPendingVerify(null);
-            setResendState({ loading: false, sent: false, error: '' });
-            setMode('login');
-            setForm({ username: '', email: '', password: '' });
-          }}
-        />
-      </div>
-    );
-  }
-
   const isSignup = mode === 'signup';
 
-  /* ── Login / Sign Up ekrani — Dark theme ── */
   return (
     <div
       className="min-h-screen flex items-center justify-center px-6 py-12 font-sans relative overflow-hidden"
       style={{ background: 'var(--bg)' }}
     >
-      {/* Hero glow */}
       <div
         className="absolute pointer-events-none"
         style={{
@@ -213,7 +152,6 @@ export default function AuthPage({ onAuth }) {
               onSubmit={handleSubmit}
               remember={remember}
               onRememberChange={(e) => setRemember(e.target.checked)}
-              onForgotPassword={() => setForgotOpen(true)}
             />
           )}
         </Card>
@@ -232,14 +170,6 @@ export default function AuthPage({ onAuth }) {
           </p>
         </div>
       </div>
-
-      {/* Parolni tiklash modal */}
-      {forgotOpen && (
-        <ForgotPasswordModal
-          initialEmail={form.username && form.username.includes('@') ? form.username : ''}
-          onClose={() => setForgotOpen(false)}
-        />
-      )}
     </div>
   );
 }

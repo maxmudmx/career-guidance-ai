@@ -1,278 +1,215 @@
-"""ML Bashorat API endpointlari."""
+"""
+Recommender API — kasb tavsiya endpointlari.
 
-from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+ML pipeline:
+    1. O'qitilgan model `app/ml/saved/` dan yuklanadi (lazy init)
+    2. Foydalanuvchi profili (RIASEC + qiziqishlar + fanlar) → feature vector
+    3. Model top-K kasb tavsiya qiladi (cosine similarity asosida)
+    4. Har tavsiya uchun "nima uchun" izoh beriladi
+
+Model holati:
+    - content_based.pkl — joriy production model
+    - hybrid.pkl       — kelajakda (real foydalanuvchi interactions yig'ilgach)
+
+Modelni yangilash:
+    cd backend && python -m app.ml.train
+"""
+
+from __future__ import annotations
+
+import logging
+from pathlib import Path
 from typing import Optional
 
-from app.database import get_db
-from app.models.test_result import TestResult
-from app.services.ml_service import (
-    predict_career,
-    analyze_skills_gap,
-    get_roadmap,
-    OCCUPATIONS_META,
-    CATEGORIES,
-    INTERESTS,
-    SUBJECTS,
-    SKILL_CATEGORIES,
-    SKILL_LEVELS,
-)
-from app.services.course_catalog import build_learning_path
+import joblib
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
-router = APIRouter(prefix="/api/predict", tags=["ML Bashorat"])
+from app.ml.content_based import ContentBasedRecommender
+from app.ml.dataset import user_profile_to_vector
+from app.routers.auth import require_auth
+from app.models.user import User
 
-# Optional auth — token bo'lsa saqlaydi, bo'lmasa ham ishlaydi
-_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/api/predict", tags=["Recommender"])
 
 
 # ============================================================
-# Pydantic schemas
+# Lazy model loader (faqat birinchi so'rovda yuklanadi)
 # ============================================================
-class PredictionRequest(BaseModel):
-    """Bashorat uchun kiruvchi ma'lumotlar (yangi format)."""
-    riasec_scores: dict[str, float]
-    skills: list[str]
-    academic_data: dict
-    age: Optional[int] = Field(default=None, ge=10, le=100)
-    interests: list[str] = Field(default_factory=list)
-    subjects: list[str] = Field(default_factory=list)
-    skill_levels: dict[str, int] = Field(default_factory=dict)
+
+_MODEL_PATH = Path(__file__).resolve().parents[1] / "ml" / "saved" / "content_based.pkl"
+_model_cache: Optional[ContentBasedRecommender] = None
 
 
-class SkillsGapRequest(BaseModel):
-    user_skills: list[str]
-    occupation_id: int
-
-
-class LearningPathPostRequest(BaseModel):
-    user_skills: list[str]
-    occupation_id: int
+def _get_model() -> ContentBasedRecommender:
+    """O'qitilgan modelni yuklash (singleton)."""
+    global _model_cache
+    if _model_cache is None:
+        if not _MODEL_PATH.exists():
+            raise HTTPException(
+                status_code=503,
+                detail=(
+                    f"Model fayli topilmadi: {_MODEL_PATH}. "
+                    "Avval `python -m app.ml.train` ishga tushiring."
+                ),
+            )
+        logger.info("ML model yuklanmoqda: %s", _MODEL_PATH)
+        _model_cache = joblib.load(_MODEL_PATH)
+        logger.info("Model yuklandi: %d kasb", len(_model_cache.careers_df_))
+    return _model_cache
 
 
 # ============================================================
-# Bashorat endpointi
+# Sxemalar
 # ============================================================
-@router.post("/career")
-def predict(
-    data: PredictionRequest,
-    token: Optional[str] = Depends(_oauth2),
-    db: Session = Depends(get_db),
+
+class RecommendRequest(BaseModel):
+    """Tavsiya so'rovi."""
+    riasec_scores: dict[str, float] = Field(
+        ...,
+        description="6-dim psixometrik vektor: {R, I, A, S, E, C} qiymatlari 0-10",
+        examples=[{"R": 4, "I": 9, "A": 4, "S": 3, "E": 3, "C": 7}],
+    )
+    interests: list[str] = Field(
+        default_factory=list,
+        description="Foydalanuvchining qiziqishlari (taxonomies.INTERESTS kalitlari)",
+        examples=[["it", "fan", "musiqa"]],
+    )
+    subjects: list[str] = Field(
+        default_factory=list,
+        description="Yaxshi fanlar (taxonomies.SUBJECTS kalitlari)",
+        examples=[["matematika", "fizika", "informatika"]],
+    )
+    top_k: int = Field(default=5, ge=1, le=20)
+    category_filter: Optional[str] = Field(
+        default=None,
+        description="Faqat shu kategoriyadan tavsiya (masalan 'it', 'tibbiyot')",
+    )
+
+
+class RecommendedCareer(BaseModel):
+    id: int
+    name: str
+    name_uz: str
+    category: str
+    score: float = Field(..., description="Cosine similarity (0-1)")
+    explanation: list[str]
+
+
+class RecommendResponse(BaseModel):
+    recommendations: list[RecommendedCareer]
+    method: str
+    total_careers: int
+
+
+# ============================================================
+# Endpointlar
+# ============================================================
+
+@router.post("/recommend", response_model=RecommendResponse)
+def recommend(
+    data: RecommendRequest,
+    current_user: User = Depends(require_auth),
 ):
-    """ML model yordamida foydalanuvchiga mos top 5 kasbni bashorat qiladi.
+    """Foydalanuvchi profili asosida top-K kasb tavsiya qilish.
 
-    Token mavjud bo'lsa natija DB ga saqlanadi (tarix uchun).
+    Algoritm: Content-Based Filtering (Cosine similarity).
+
+    Misol:
+        ```json
+        {
+          "riasec_scores": {"R":4,"I":9,"A":4,"S":3,"E":3,"C":7},
+          "interests": ["it", "fan"],
+          "subjects": ["matematika", "fizika", "informatika"],
+          "top_k": 5
+        }
+        ```
     """
-    predictions = predict_career(
+    model = _get_model()
+
+    # Profile validation
+    required_riasec = {"R", "I", "A", "S", "E", "C"}
+    if not required_riasec.issubset(data.riasec_scores.keys()):
+        raise HTTPException(
+            status_code=400,
+            detail=f"RIASEC scores'da quyidagi kalitlar bo'lishi shart: {required_riasec}",
+        )
+
+    # Profile → vector
+    user_vec = user_profile_to_vector(
         riasec_scores=data.riasec_scores,
-        skills=data.skills,
-        academic_data=data.academic_data,
-        age=data.age,
         interests=data.interests,
         subjects=data.subjects,
-        skill_levels=data.skill_levels,
     )
 
-    # Autentifikatsiya qilingan bo'lsa DB ga saqlash
-    if token:
-        try:
-            from app.routers.auth import verify_token
-            payload = verify_token(token)
-            if payload and payload.get("user_id"):
-                # Yangi maydonlarni academic_data ichiga qo'shamiz
-                # (modelni o'zgartirmasdan saqlash uchun)
-                extended_academic = dict(data.academic_data or {})
-                if data.age is not None:
-                    extended_academic["age"] = data.age
-                if data.interests:
-                    extended_academic["interests"] = data.interests
-                if data.subjects:
-                    extended_academic["subjects"] = data.subjects
-                if data.skill_levels:
-                    extended_academic["skill_levels"] = data.skill_levels
+    # Predict
+    results = model.predict(
+        user_vec,
+        k=data.top_k,
+        category_filter=data.category_filter,
+    )
 
-                record = TestResult(
-                    user_id=payload["user_id"],
-                    riasec_scores=data.riasec_scores,
-                    academic_data=extended_academic,
-                    user_skills=data.skills,
-                    predictions={"top": predictions},
-                )
-                db.add(record)
-                db.commit()
-        except Exception:
-            db.rollback()  # Saqlash xato bo'lsa ham natija qaytariladi
-
-    return {
-        "predictions": predictions,
-        "model_type": "RandomForestClassifier",
-        "total_occupations": len(OCCUPATIONS_META),
-        "top_career": predictions[0] if predictions else None,
-    }
-
-
-# ============================================================
-# Skills gap
-# ============================================================
-@router.post("/skills-gap")
-def skills_gap(data: SkillsGapRequest):
-    """Tanlangan kasb uchun ko'nikmalar farqini tahlil qiladi."""
-    return analyze_skills_gap(
-        user_skills=data.user_skills,
-        occupation_id=data.occupation_id,
+    return RecommendResponse(
+        recommendations=[RecommendedCareer(**r) for r in results],
+        method="content-based (cosine similarity)",
+        total_careers=len(model.careers_df_),
     )
 
 
-# ============================================================
-# Learning path
-# ============================================================
-@router.get("/learning-path/{occupation_id}")
-def learning_path(
-    occupation_id: int,
-    token: Optional[str] = Depends(_oauth2),
-    db: Session = Depends(get_db),
-):
-    """Tanlangan kasb uchun kurslar tavsiyasi."""
-    occ = OCCUPATIONS_META.get(occupation_id)
-    if not occ:
-        return {"error": "Kasb topilmadi"}
-
-    user_skills: list[str] = []
-    if token:
-        try:
-            from app.routers.auth import verify_token
-            payload = verify_token(token)
-            if payload and payload.get("user_id"):
-                latest = (
-                    db.query(TestResult)
-                    .filter(TestResult.user_id == payload["user_id"])
-                    .order_by(TestResult.created_at.desc())
-                    .first()
-                )
-                if latest and latest.user_skills:
-                    user_skills = list(latest.user_skills)
-        except Exception:
-            pass
-
-    required = occ["required_skills"]
-    matched = [s for s in required if s in user_skills]
-    missing = [s for s in required if s not in user_skills]
-    path = build_learning_path(missing, required_order=required)
-
-    return {
-        "occupation": occ["name_uz"],
-        "occupation_en": occ["name"],
-        "category": CATEGORIES.get(occ.get("category", ""), ""),
-        "required_skills": required,
-        "matched_skills": matched,
-        "match_percent": round((len(matched) / len(required)) * 100) if required else 0,
-        **path,
-    }
-
-
-@router.post("/learning-path")
-def learning_path_post(data: LearningPathPostRequest):
-    """Token bermagan foydalanuvchilar uchun: skillarni body orqali yuborish."""
-    occ = OCCUPATIONS_META.get(data.occupation_id)
-    if not occ:
-        return {"error": "Kasb topilmadi"}
-
-    required = occ["required_skills"]
-    matched = [s for s in required if s in data.user_skills]
-    missing = [s for s in required if s not in data.user_skills]
-    path = build_learning_path(missing, required_order=required)
-
-    return {
-        "occupation": occ["name_uz"],
-        "occupation_en": occ["name"],
-        "category": CATEGORIES.get(occ.get("category", ""), ""),
-        "required_skills": required,
-        "matched_skills": matched,
-        "match_percent": round((len(matched) / len(required)) * 100) if required else 0,
-        **path,
-    }
-
-
-# ============================================================
-# Roadmap
-# ============================================================
-@router.get("/roadmap/{occupation_id}")
-def roadmap(
-    occupation_id: int,
-    token: Optional[str] = Depends(_oauth2),
-    db: Session = Depends(get_db),
-):
-    """Tanlangan kasb uchun 6 oylik personallashtirilgan yo'l xaritasi."""
-    user_skills = []
-    if token:
-        try:
-            from app.routers.auth import verify_token
-            payload = verify_token(token)
-            if payload and payload.get("user_id"):
-                latest = (
-                    db.query(TestResult)
-                    .filter(TestResult.user_id == payload["user_id"])
-                    .order_by(TestResult.created_at.desc())
-                    .first()
-                )
-                if latest and latest.user_skills:
-                    user_skills = list(latest.user_skills)
-        except Exception:
-            pass
-
-    return get_roadmap(occupation_id, user_skills)
-
-
-# ============================================================
-# Yangi: Metadata endpoint — frontend formani to'ldirishi uchun
-# ============================================================
 @router.get("/metadata")
-def metadata():
-    """Frontend uchun barcha taksonomiyalar va kasblar ro'yxati.
-
-    Frontendda yosh, qiziqishlar, fanlar, ko'nikmalar va kategoriyalarni
-    chizish uchun ishlatiladi.
-    """
+def get_metadata():
+    """Forma uchun barcha taxonomiyalar bir so'rovda."""
+    from app.data.taxonomies import (
+        CATEGORIES, INTERESTS, SUBJECTS,
+        SKILL_CATEGORIES, SKILL_LEVELS, RIASEC_NAMES,
+    )
     return {
-        "categories": [
-            {"key": k, "label": v} for k, v in CATEGORIES.items()
-        ],
-        "interests": [
-            {"key": k, "label": v} for k, v in INTERESTS.items()
-        ],
-        "subjects": [
-            {"key": k, "label": v} for k, v in SUBJECTS.items()
-        ],
+        "categories": [{"key": k, "name": v} for k, v in CATEGORIES.items()],
+        "interests": [{"key": k, "name": v} for k, v in INTERESTS.items()],
+        "subjects": [{"key": k, "name": v} for k, v in SUBJECTS.items()],
         "skill_categories": SKILL_CATEGORIES,
-        "skill_levels": [
-            {"value": k, "label": v} for k, v in SKILL_LEVELS.items()
-        ],
-        "total_occupations": len(OCCUPATIONS_META),
+        "skill_levels": SKILL_LEVELS,
+        "riasec_names": RIASEC_NAMES,
     }
 
 
-# ============================================================
-# Yangi: Kasblar ro'yxati (filtrlash uchun)
-# ============================================================
-@router.get("/occupations")
-def list_occupations(category: Optional[str] = None):
-    """Barcha (yoki kategoriya bo'yicha) kasblarni qaytaradi."""
-    items = []
-    for occ_id, occ in OCCUPATIONS_META.items():
-        if category and occ.get("category") != category:
-            continue
-        items.append({
-            "id": occ_id,
-            "name": occ["name"],
-            "name_uz": occ["name_uz"],
-            "category": occ.get("category"),
-            "category_uz": CATEGORIES.get(occ.get("category", ""), ""),
-            "avg_salary": occ["avg_salary"],
-            "demand": occ.get("demand"),
-            "growth": occ.get("growth"),
-            "description_uz": occ["description_uz"],
-            "required_skills": occ.get("required_skills", []),
-            "age_range": occ.get("age_range", [16, 65]),
-        })
-    return {"total": len(items), "occupations": items}
+@router.get("/categories")
+def list_categories():
+    """Mavjud kasb kategoriyalari (filter uchun foydali)."""
+    from app.data.taxonomies import CATEGORIES
+    return {"categories": CATEGORIES}
+
+
+@router.get("/interests")
+def list_interests():
+    """Mavjud qiziqishlar."""
+    from app.data.taxonomies import INTERESTS
+    return {"interests": INTERESTS}
+
+
+@router.get("/subjects")
+def list_subjects():
+    """Mavjud o'quv fanlari."""
+    from app.data.taxonomies import SUBJECTS
+    return {"subjects": SUBJECTS}
+
+
+@router.get("/model-info")
+def model_info():
+    """Model haqida texnik ma'lumot (himoyaga foydali)."""
+    model = _get_model()
+    careers_df = model.careers_df_
+    return {
+        "algorithm": "Content-Based Filtering (Cosine Similarity)",
+        "feature_dim": int(model.X_careers_.shape[1]),
+        "total_careers": int(len(careers_df)),
+        "total_categories": int(careers_df["category"].nunique()),
+        "feature_breakdown": {
+            "riasec": 6,
+            "categories": 30,
+            "interests": 33,
+            "subjects": 32,
+        },
+    }
