@@ -90,6 +90,21 @@ export const recommendAPI = {
   getMetadata: () => api.get('/predict/metadata'),
 };
 
+// ============================================================
+// Foydalanuvchi (tarix, profil)
+// ============================================================
+
+export const userAPI = {
+  getHistory: () => api.get('/users/history'),
+  deleteHistory: (testId) => api.delete(`/users/history/${testId}`),
+  changePassword: (currentPassword, newPassword) =>
+    api.post('/users/change-password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  getStats: () => api.get('/users/stats'),
+};
+
 // Eski sahifalar uchun alias (AcademicSkills bilan moslik)
 export const predictAPI = {
   getMetadata: () => api.get('/predict/metadata'),

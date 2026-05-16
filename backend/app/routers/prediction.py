@@ -24,11 +24,14 @@ from typing import Optional
 import joblib
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.ml.content_based import ContentBasedRecommender
 from app.ml.dataset import user_profile_to_vector
 from app.routers.auth import require_auth
 from app.models.user import User
+from app.models.test_result import TestResult
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +115,7 @@ class RecommendResponse(BaseModel):
 def recommend(
     data: RecommendRequest,
     current_user: User = Depends(require_auth),
+    db: Session = Depends(get_db),
 ):
     """Foydalanuvchi profili asosida top-K kasb tavsiya qilish.
 
@@ -150,6 +154,24 @@ def recommend(
         k=data.top_k,
         category_filter=data.category_filter,
     )
+
+    # DB ga saqlash (tarix uchun)
+    try:
+        test_result = TestResult(
+            user_id=current_user.id,
+            riasec_scores=data.riasec_scores,
+            academic_data={
+                "interests": data.interests,
+                "subjects": data.subjects,
+            },
+            user_skills=[],
+            recommendations=results,
+        )
+        db.add(test_result)
+        db.commit()
+    except Exception as e:
+        logger.exception("TestResult saqlashda xato: %s", e)
+        db.rollback()
 
     return RecommendResponse(
         recommendations=[RecommendedCareer(**r) for r in results],

@@ -14,7 +14,7 @@ logging.basicConfig(
     force=True,
 )
 
-from app.routers import auth, test, prediction
+from app.routers import auth, test, prediction, users
 
 app = FastAPI(
     title="Kasbim API",
@@ -35,6 +35,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(test.router)
 app.include_router(prediction.router)
+app.include_router(users.router)
 
 
 @app.on_event("startup")
