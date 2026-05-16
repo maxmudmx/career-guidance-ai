@@ -112,10 +112,20 @@ export default function AuthPage({ onAuth }) {
         setResendState({ loading: false, sent: false, error: '' });
         return;
       }
-      const msg = Array.isArray(detail)
-        ? detail.map((d) => d.msg).join(', ')
-        : (typeof detail === 'string' ? detail : detail?.message) ||
-          "Xatolik yuz berdi. Qayta urinib ko'ring.";
+      let msg;
+      if (Array.isArray(detail)) {
+        msg = detail.map((d) => d.msg).join(', ');
+      } else if (typeof detail === 'string') {
+        msg = detail;
+      } else if (detail?.message) {
+        msg = detail.message;
+      } else if (err.response?.status) {
+        msg = `Server xatosi: HTTP ${err.response.status}`;
+      } else if (err.message) {
+        msg = `Tarmoq xatosi: ${err.message}`;
+      } else {
+        msg = "Xatolik yuz berdi. Qayta urinib ko'ring.";
+      }
       setServerError(msg);
     } finally {
       setLoading(false);
