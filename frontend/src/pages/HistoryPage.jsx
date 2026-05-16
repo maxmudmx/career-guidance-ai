@@ -58,7 +58,7 @@ export default function HistoryPage({ onBack }) {
 
         {!loading && error && (
           <Card className="p-6 text-center">
-            <p className="text-sm mb-4" style={{ color: '#DC2626' }}>{error}</p>
+            <p className="text-sm mb-4" style={{ color: 'var(--text)' }}>{error}</p>
             <Button variant="primary" onClick={load}>Qaytadan</Button>
           </Card>
         )}
@@ -111,7 +111,7 @@ function HistoryCard({ item, onDelete, isDeleting, formatDate }) {
           onClick={onDelete}
           disabled={isDeleting}
           className="text-xs px-2 py-1 rounded hover:opacity-70 transition-opacity disabled:opacity-50"
-          style={{ background: 'var(--bg-hover)', color: '#DC2626' }}
+          style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
         >
           {isDeleting ? "..." : "O'chirish"}
         </button>

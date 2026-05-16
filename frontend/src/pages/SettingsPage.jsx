@@ -84,7 +84,7 @@ export default function SettingsPage({ user, onLogout }) {
               className="w-full flex items-center gap-4 px-5 py-4 text-left transition-opacity hover:opacity-90"
             >
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium" style={{ color: '#DC2626' }}>
+                <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
                   Tizimdan chiqish
                 </div>
                 <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -93,7 +93,7 @@ export default function SettingsPage({ user, onLogout }) {
               </div>
               <div
                 className="text-xs font-medium px-3 py-1 rounded-lg"
-                style={{ background: 'rgba(220, 38, 38, 0.12)', color: '#DC2626' }}
+                style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
               >
                 Chiqish
               </div>

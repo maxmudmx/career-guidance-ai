@@ -26,28 +26,28 @@ const PROBLEM_STATS = [
     suffix: '%',
     label: "yoshlar tanlagan kasbidan pushaymon",
     desc: "FlexJobs (2023) tadqiqotiga ko'ra, har 3 ta yoshdan 2 tasi tanlagan ish yo'lidan afsuslangan",
-    color: '#EF4444',
+    color: 'var(--text)',
   },
   {
     value: 13.6,
     suffix: '%',
     label: "global yoshlar ishsizligi",
     desc: "ILO 2024: 15-24 yoshdagilar orasida ishsizlik darajasi 3 baravar ko'p kattalardan",
-    color: '#F59E0B',
+    color: 'var(--text)',
   },
   {
     value: 23,
     suffix: '%',
     label: "yoshlar NEET — ne ish, ne o'qish",
     desc: "Jahon Banki: yoshlarning chorak qismi ne ishlaydi, ne o'qiydi — boshi berk ko'chada",
-    color: '#DC2626',
+    color: 'var(--text)',
   },
   {
     value: 7,
     suffix: ' yil',
     label: "noto'g'ri kasb uchun sarflangan",
     desc: "O'rtacha bitiruvchi 5-7 yilni boshqa sohaga o'tib qayta o'rganishga sarflaydi",
-    color: '#7C3AED',
+    color: 'var(--text)',
   },
 ];
 
@@ -170,11 +170,11 @@ function LiveDot() {
     <span className="relative inline-flex items-center justify-center w-2.5 h-2.5">
       <span
         className="absolute inline-flex w-full h-full rounded-full opacity-75 animate-ping"
-        style={{ background: '#22C55E' }}
+        style={{ background: 'var(--text)' }}
       />
       <span
         className="relative inline-flex w-2 h-2 rounded-full"
-        style={{ background: '#22C55E' }}
+        style={{ background: 'var(--text)' }}
       />
     </span>
   );
@@ -216,16 +216,7 @@ export default function WelcomePage({ onStart }) {
       {/* Hero */}
       <section className="pt-24 pb-20 px-6 relative overflow-hidden">
         <div
-          className="absolute pointer-events-none"
-          style={{
-            top: '-10%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: 800,
-            height: 500,
-            background:
-              'radial-gradient(ellipse at center, rgba(59,130,246,0.18) 0%, transparent 70%)',
-          }}
+          style={{ display: 'none' }}
         />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
@@ -266,11 +257,10 @@ export default function WelcomePage({ onStart }) {
 
           <button
             onClick={onStart}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105 hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105"
             style={{
-              background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-              color: 'white',
-              boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)',
+              background: 'var(--text)',
+              color: 'var(--bg)',
             }}
           >
             Testni boshlash
@@ -305,9 +295,9 @@ export default function WelcomePage({ onStart }) {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <AppStatCard value={totalUsers} label="Foydalanuvchilar" color="var(--accent)" />
-            <AppStatCard value={activeNow} label="Hozir onlayn" color="#22C55E" showLive />
+            <AppStatCard value={activeNow} label="Hozir onlayn" color="var(--text)" showLive />
             <AppStatCard value={totalTests} label="Testlar o'tkazilgan" color="var(--accent)" />
-            <AppStatCard value={testsThisWeek} label="Bu hafta testlar" color="#7C3AED" />
+            <AppStatCard value={testsThisWeek} label="Bu hafta testlar" color="var(--text)" />
           </div>
 
           {/* Mashhur kasblar va dominant tip */}
@@ -385,9 +375,9 @@ export default function WelcomePage({ onStart }) {
             <div
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-xs font-semibold"
               style={{
-                background: 'rgba(239,68,68,0.12)',
-                color: '#EF4444',
-                border: '1px solid rgba(239,68,68,0.3)',
+                background: 'var(--bg-hover)',
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
               }}
             >
               Bugungi haqiqat
@@ -471,9 +461,9 @@ export default function WelcomePage({ onStart }) {
           <div
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 text-xs font-semibold"
             style={{
-              background: 'rgba(34,197,94,0.12)',
-              color: '#22C55E',
-              border: '1px solid rgba(34,197,94,0.3)',
+              background: 'var(--bg-hover)',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
             }}
           >
             Yechim mavjud

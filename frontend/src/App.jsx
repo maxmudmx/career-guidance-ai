@@ -28,9 +28,9 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
       }`}
       style={{
         background: primary
-          ? 'linear-gradient(135deg, #3b82f6, #06b6d4)'
+          ? 'var(--text)'
           : route === target ? 'var(--accent-soft)' : 'transparent',
-        color: primary ? 'white' : 'var(--text)',
+        color: primary ? 'var(--bg)' : 'var(--text)',
       }}
     >
       {label}
@@ -73,8 +73,8 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 onClick={onStartTest}
                 className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
                 style={{
-                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-                  color: 'white',
+                  background: 'var(--text)',
+                  color: 'var(--bg)',
                 }}
               >
                 Kirish / Ro'yxatdan o'tish
@@ -116,8 +116,8 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 onClick={() => { onStartTest(); setMenuOpen(false); }}
                 className="px-4 py-2 rounded-lg text-sm font-semibold"
                 style={{
-                  background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
-                  color: 'white',
+                  background: 'var(--text)',
+                  color: 'var(--bg)',
                 }}
               >
                 Kirish / Ro'yxatdan o'tish

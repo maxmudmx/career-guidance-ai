@@ -68,7 +68,7 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
 
         {!loading && error && (
           <Card className="p-6 text-center">
-            <p className="text-sm mb-4" style={{ color: '#DC2626' }}>{error}</p>
+            <p className="text-sm mb-4" style={{ color: 'var(--text)' }}>{error}</p>
             <Button variant="primary" onClick={onRetake}>
               Qaytadan urinish
             </Button>
@@ -128,7 +128,7 @@ function CareerResultCard({ rank, career }) {
             className="h-full rounded-full"
             style={{
               width: `${confidence}%`,
-              background: 'linear-gradient(90deg, var(--accent), #06b6d4)',
+              background: 'var(--text)',
             }}
           />
         </div>

@@ -41,12 +41,12 @@ const QUESTIONS = [
 ];
 
 const CATEGORIES = {
-  R: { name: 'Realistik', color: '#DC2626', desc: 'Amaliy va texnik ishlar' },
-  I: { name: 'Tadqiqotchi', color: '#2563EB', desc: 'Ilm va tahlil' },
-  A: { name: 'Ijodkor', color: '#7C3AED', desc: "San'at va ijod" },
-  S: { name: 'Ijtimoiy', color: '#16A34A', desc: 'Odamlar bilan ishlash' },
-  E: { name: 'Tadbirkor', color: '#F59E0B', desc: 'Biznes va rahbarlik' },
-  C: { name: 'Konvensional', color: '#0891B2', desc: 'Tizimli ishlar' },
+  R: { name: 'Realistik', color: 'var(--text)', desc: 'Amaliy va texnik ishlar' },
+  I: { name: 'Tadqiqotchi', color: 'var(--text)', desc: 'Ilm va tahlil' },
+  A: { name: 'Ijodkor', color: 'var(--text)', desc: "San'at va ijod" },
+  S: { name: 'Ijtimoiy', color: 'var(--text)', desc: 'Odamlar bilan ishlash' },
+  E: { name: 'Tadbirkor', color: 'var(--text)', desc: 'Biznes va rahbarlik' },
+  C: { name: 'Konvensional', color: 'var(--text)', desc: 'Tizimli ishlar' },
 };
 
 const LIKERT = [
@@ -189,7 +189,7 @@ export default function RiasecTest({ onComplete, onBack }) {
               const info = CATEGORIES[cat.key];
               const isActive = question.category === cat.key;
               const cls = cat.completed
-                ? 'bg-[#16A34A] border-[#16A34A] text-white'
+                ? 'bg-[#16A34A] border-[#16A34A]'
                 : isActive
                 ? 'border-[#2563EB] text-[#2563EB] bg-white'
                 : 'border-[#E5E7EB] text-[#9CA3AF] bg-white';

@@ -17,7 +17,7 @@ export default function AuthCard({ title, onBack, children, footer }) {
       <div
         className="px-6 py-5 flex items-center gap-3 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 100%)',
+          background: 'var(--text)',
         }}
       >
         {/* Subtle glow */}

@@ -153,13 +153,13 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
         {/* Bildirishnomalar */}
         {success && (
           <div className="mb-4 p-3 rounded-lg text-sm"
-            style={{ background: 'var(--success-bg)', color: '#16A34A' }}>
+            style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}>
             {success}
           </div>
         )}
         {error && (
           <div className="mb-4 p-3 rounded-lg text-sm"
-            style={{ background: 'var(--error-bg)', color: '#DC2626' }}>
+            style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}>
             {error}
           </div>
         )}
@@ -169,12 +169,12 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           <div
             onClick={avatarSrc ? () => setViewerOpen(true) : undefined}
             className={`relative w-28 h-28 rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden ${avatarSrc ? 'cursor-pointer' : ''}`}
-            style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}
+            style={{ background: 'var(--text)', color: 'var(--bg)' }}
           >
             {avatarSrc ? (
               <img src={avatarSrc} alt="avatar" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-white text-4xl font-semibold">{initials}</span>
+              <span className="text-4xl font-semibold" style={{ color: 'var(--bg)' }}>{initials}</span>
             )}
             {uploading && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-xs">
@@ -187,7 +187,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
             {profile?.full_name || profile?.username}
           </h1>
           <p className="text-sm flex items-center justify-center gap-1.5 mt-1" style={{ color: 'var(--text-muted)' }}>
-            <span className="inline-block w-2 h-2 rounded-full" style={{ background: '#22C55E' }} />
+            <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'var(--text)' }} />
             onlayn
           </p>
         </div>
@@ -218,7 +218,7 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
               onClick={handleDeleteAvatar}
               disabled={uploading}
               className="text-xs opacity-70 hover:opacity-100 transition-opacity disabled:opacity-50"
-              style={{ color: '#DC2626' }}
+              style={{ color: 'var(--text-muted)' }}
             >
               Avatarni o'chirish
             </button>
