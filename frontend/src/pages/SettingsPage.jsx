@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/LanguageContext';
@@ -32,7 +32,7 @@ export default function SettingsPage({ user, onLogout }) {
           </div>
         </Card>
 
-        {/* Language */}
+        {/* Language — dropdown */}
         <Card className="overflow-hidden mb-3">
           <div className="flex items-center gap-4 px-5 py-4">
             <div className="flex-1 min-w-0">
@@ -43,22 +43,7 @@ export default function SettingsPage({ user, onLogout }) {
                 {t('settings.language.desc')}
               </div>
             </div>
-            <div className="flex gap-1.5">
-              {LANGUAGE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.code}
-                  onClick={() => setLang(opt.code)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-                  style={{
-                    background: lang === opt.code ? 'var(--text)' : 'var(--bg-hover)',
-                    color: lang === opt.code ? 'var(--bg)' : 'var(--text)',
-                  }}
-                  title={opt.label}
-                >
-                  {opt.flag}
-                </button>
-              ))}
-            </div>
+            <LanguageDropdown lang={lang} setLang={setLang} />
           </div>
         </Card>
 
@@ -76,12 +61,15 @@ export default function SettingsPage({ user, onLogout }) {
                 {t('settings.about.desc')}
               </div>
             </div>
-            <div
-              className="text-xs font-medium px-3 py-1 rounded-lg"
-              style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)' }}
+            <span
+              className="text-xl font-bold transition-transform"
+              style={{
+                color: 'var(--text-muted)',
+                transform: aboutOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+              }}
             >
-              {aboutOpen ? t('settings.about.close') : t('settings.about.view')}
-            </div>
+              ▾
+            </span>
           </button>
 
           {aboutOpen && (
@@ -157,5 +145,70 @@ function Switch({ checked, onChange }) {
         }}
       />
     </button>
+  );
+}
+
+
+function LanguageDropdown({ lang, setLang }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    if (open) document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [open]);
+
+  const current = LANGUAGE_OPTIONS.find((o) => o.code === lang) || LANGUAGE_OPTIONS[0];
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-80"
+        style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+      >
+        {current.flag}
+        <span
+          className="text-xs transition-transform"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-2 rounded-lg overflow-hidden border min-w-[140px] z-10"
+          style={{
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          }}
+        >
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.code}
+              onClick={() => { setLang(opt.code); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors hover:opacity-80"
+              style={{
+                background: opt.code === lang ? 'var(--bg-hover)' : 'transparent',
+                color: 'var(--text)',
+              }}
+            >
+              <span className="font-semibold text-xs w-7">{opt.flag}</span>
+              <span>{opt.label}</span>
+              {opt.code === lang && (
+                <span className="ml-auto text-xs">✓</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

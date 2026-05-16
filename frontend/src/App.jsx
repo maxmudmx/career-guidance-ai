@@ -2,7 +2,7 @@
  * Kasbim — ML Recommender System (diplom versiyasi)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import WelcomePage from './pages/WelcomePage';
 import AuthPage from './pages/AuthPage';
 import TestIntroPage from './pages/TestIntroPage';
@@ -13,9 +13,99 @@ import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import { authAPI, tokenStorage } from './services/api';
-import { ThemeProvider } from './contexts/ThemeContext';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
+import { LANGUAGE_OPTIONS } from './i18n/translations';
 import './index.css';
+
+
+// ─── Theme toggle (Sun / Moon SVG) ──────────────────────────
+function ThemeToggleButton() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      title={theme === 'dark' ? 'Light' : 'Dark'}
+      className="p-2 rounded-lg transition-opacity hover:opacity-70 flex-shrink-0"
+      style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+    >
+      {theme === 'dark' ? (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2"/><path d="M12 20v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/>
+          <path d="M2 12h2"/><path d="M20 12h2"/><path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      ) : (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      )}
+    </button>
+  );
+}
+
+
+// ─── Language dropdown ──────────────────────────────────────
+function LanguageDropdown() {
+  const { lang, setLang } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    if (open) document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [open]);
+
+  const current = LANGUAGE_OPTIONS.find((o) => o.code === lang) || LANGUAGE_OPTIONS[0];
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+        style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+      >
+        {current.flag}
+        <span
+          className="transition-transform"
+          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+        >
+          ▾
+        </span>
+      </button>
+
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-2 rounded-lg overflow-hidden border min-w-[140px] z-[60]"
+          style={{
+            background: 'var(--surface)',
+            borderColor: 'var(--border)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          }}
+        >
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.code}
+              onClick={() => { setLang(opt.code); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors hover:opacity-80"
+              style={{
+                background: opt.code === lang ? 'var(--bg-hover)' : 'transparent',
+                color: 'var(--text)',
+              }}
+            >
+              <span className="font-semibold text-xs w-7">{opt.flag}</span>
+              <span>{opt.label}</span>
+              {opt.code === lang && <span className="ml-auto text-xs">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 
 function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
@@ -62,6 +152,8 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink label={t('nav.history')} target="history" />
                 <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />
+                <ThemeToggleButton />
+                <LanguageDropdown />
                 <button
                   onClick={onLogout}
                   className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-70"
@@ -71,23 +163,31 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 </button>
               </>
             ) : (
-              <button
-                onClick={onStartTest}
-                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                style={{ background: 'var(--text)', color: 'var(--bg)' }}
-              >
-                {t('nav.login_register')}
-              </button>
+              <>
+                <ThemeToggleButton />
+                <LanguageDropdown />
+                <button
+                  onClick={onStartTest}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                  style={{ background: 'var(--text)', color: 'var(--bg)' }}
+                >
+                  {t('nav.login_register')}
+                </button>
+              </>
             )}
           </div>
 
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden px-3 py-1.5 rounded-lg text-sm font-medium"
-            style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-          >
-            {menuOpen ? t('nav.close') : t('nav.menu')}
-          </button>
+          <div className="md:hidden flex items-center gap-1.5">
+            <ThemeToggleButton />
+            <LanguageDropdown />
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="px-3 py-1.5 rounded-lg text-sm font-medium"
+              style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+            >
+              {menuOpen ? t('nav.close') : t('nav.menu')}
+            </button>
+          </div>
         </div>
 
         {menuOpen && (
