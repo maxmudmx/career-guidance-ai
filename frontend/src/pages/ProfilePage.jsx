@@ -26,10 +26,11 @@ const usersAPI = {
 // ────────────────────────────────────────────────────────────
 function AvatarLarge({ avatarUrl, username, onClick, uploading }) {
   const initials = (username || 'U').slice(0, 2).toUpperCase();
+  const STATIC_BASE = import.meta.env.VITE_STATIC_URL || 'http://localhost:8000';
   const src = avatarUrl
     ? avatarUrl.startsWith('blob:')
       ? avatarUrl
-      : `http://localhost:8000${avatarUrl}`
+      : `${STATIC_BASE}${avatarUrl}`
     : null;
   const clickable = !!src;
   return (
@@ -445,7 +446,7 @@ export default function ProfilePage({ onBack }) {
           src={
             profile.avatar_url.startsWith('blob:')
               ? profile.avatar_url
-              : `http://localhost:8000${profile.avatar_url}`
+              : `${import.meta.env.VITE_STATIC_URL || 'http://localhost:8000'}${profile.avatar_url}`
           }
           onClose={() => setViewerOpen(false)}
         />
