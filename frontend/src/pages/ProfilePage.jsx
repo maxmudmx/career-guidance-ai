@@ -142,9 +142,12 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
 
   const formatDate = (iso) => {
     if (!iso) return null;
-    return new Date(iso).toLocaleDateString('uz-UZ', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    });
+    const d = new Date(iso);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const months = ['yan', 'fev', 'mar', 'apr', 'may', 'iyn', 'iyl', 'avg', 'sen', 'okt', 'noy', 'dek'];
+    const mm = months[d.getMonth()];
+    const yyyy = d.getFullYear();
+    return `${dd}-${mm}, ${yyyy}`;
   };
 
   const avatarSrc = fullAvatar(profile?.avatar_url);
@@ -253,9 +256,6 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           )}
           {profile?.date_of_birth && (
             <ProfileRow label="Tug'ilgan kun" value={formatDate(profile.date_of_birth)} />
-          )}
-          {profile?.created_at && (
-            <ProfileRow label="Ro'yxatdan o'tilgan" value={formatDate(profile.created_at)} />
           )}
           {profile?.stats && (
             <ProfileRow label="Topshirilgan testlar" value={`${profile.stats.test_count || 0} ta`} />
