@@ -45,17 +45,26 @@ def create_tables():
 
 @app.on_event("startup")
 def ensure_ml_model():
-    """Agar ML model fayli yo'q bo'lsa, o'qitamiz (bir martalik)."""
+    """Agar ML model fayli yo'q bo'lsa, faqat Content-Based modelni tezda tayyorlash.
+
+    To'liq pipeline (5 model + alpha tuning) yarim daqiqa o'rniga 5-7 daqiqa oladi —
+    bu startup'ni bloklaydi va Render port ochilishini kutib timeout qiladi.
+    Shuning uchun bu yerda faqat production'da kerak bo'lgan CB modelni saqlaymiz.
+    """
     from pathlib import Path
+    import joblib
     model_path = Path(__file__).parent / "ml" / "saved" / "content_based.pkl"
-    if not model_path.exists():
-        logging.info("ML model fayli topilmadi, o'qitilmoqda: %s", model_path)
-        from app.ml.train import main as train_main
-        try:
-            train_main()
-            logging.info("ML model muvaffaqiyatli o'qitildi")
-        except Exception as e:
-            logging.exception("ML model o'qitishda xato: %s", e)
+    if model_path.exists():
+        return
+    logging.info("ML model fayli yo'q, Content-Based tayyorlanmoqda: %s", model_path)
+    try:
+        from app.ml.content_based import ContentBasedRecommender
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        cb = ContentBasedRecommender().fit()  # tez — faqat career feature matritsani quradi
+        joblib.dump(cb, model_path)
+        logging.info("CB model saqlandi: %s", model_path)
+    except Exception as e:
+        logging.exception("ML model o'qitishda xato: %s", e)
 
 
 @app.get("/", tags=["Root"])
