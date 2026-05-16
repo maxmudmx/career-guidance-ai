@@ -207,7 +207,7 @@ function LiveDot() {
   );
 }
 
-export default function WelcomePage() {
+export default function WelcomePage({ onStart }) {
   const [activeNow, setActiveNow] = useState(0);
   const [overview, setOverview] = useState(null);
 
@@ -286,11 +286,27 @@ export default function WelcomePage() {
             sizga eng mos kasbni topib beramiz.
           </p>
           <p
-            className="text-base max-w-2xl mx-auto leading-relaxed font-medium"
+            className="text-base max-w-2xl mx-auto leading-relaxed font-medium mb-8"
             style={{ color: 'var(--accent)' }}
           >
             5 daqiqa — butun umringizga to'g'ri yo'nalish.
           </p>
+
+          <button
+            onClick={onStart}
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105 hover:shadow-xl"
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6, #06b6d4)',
+              color: 'white',
+              boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)',
+            }}
+          >
+            Testni boshlash
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
         </div>
       </section>
 
