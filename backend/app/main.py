@@ -43,6 +43,21 @@ def create_tables():
     Base.metadata.create_all(bind=engine)
 
 
+@app.on_event("startup")
+def ensure_ml_model():
+    """Agar ML model fayli yo'q bo'lsa, o'qitamiz (bir martalik)."""
+    from pathlib import Path
+    model_path = Path(__file__).parent / "ml" / "saved" / "content_based.pkl"
+    if not model_path.exists():
+        logging.info("ML model fayli topilmadi, o'qitilmoqda: %s", model_path)
+        from app.ml.train import main as train_main
+        try:
+            train_main()
+            logging.info("ML model muvaffaqiyatli o'qitildi")
+        except Exception as e:
+            logging.exception("ML model o'qitishda xato: %s", e)
+
+
 @app.get("/", tags=["Root"])
 def root():
     return {
