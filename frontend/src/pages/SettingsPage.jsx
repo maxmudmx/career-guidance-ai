@@ -5,7 +5,7 @@ import { useTranslation } from '../contexts/LanguageContext';
 import { LANGUAGE_OPTIONS } from '../i18n/translations';
 
 
-export default function SettingsPage({ user, onLogout }) {
+export default function SettingsPage({ user, onLogout, onNavigate }) {
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useTranslation();
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -91,6 +91,31 @@ export default function SettingsPage({ user, onLogout }) {
             </div>
           )}
         </Card>
+
+        {/* Change password */}
+        {user && (
+          <Card className="overflow-hidden mb-3">
+            <button
+              onClick={() => onNavigate?.('password')}
+              className="w-full flex items-center gap-4 px-5 py-4 text-left transition-opacity hover:opacity-90"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+                  {t('settings.password.label')}
+                </div>
+                <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {t('settings.password.desc')}
+                </div>
+              </div>
+              <div
+                className="text-xs font-medium px-3 py-1 rounded-lg"
+                style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)' }}
+              >
+                {t('settings.password.btn')}
+              </div>
+            </button>
+          </Card>
+        )}
 
         {/* Logout */}
         {user && (

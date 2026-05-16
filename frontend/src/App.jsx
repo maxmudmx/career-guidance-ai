@@ -13,6 +13,7 @@ import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ContactPage from './pages/ContactPage';
+import ChangePasswordPage from './pages/ChangePasswordPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
@@ -350,7 +351,12 @@ function AppInner() {
           user={user}
           onBack={() => setRoute('home')}
           onLogout={handleLogout}
+          onNavigate={setRoute}
         />
+      )}
+
+      {route === 'password' && user && (
+        <ChangePasswordPage onBack={() => setRoute('settings')} />
       )}
 
       {route === 'contact' && <ContactPage />}
