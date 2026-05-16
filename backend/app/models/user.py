@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Date, Boolean, Text
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -16,7 +16,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(200))
-    avatar_url = Column(String(500), nullable=True)
+    avatar_url = Column(Text, nullable=True)  # data URL (base64) yoki path
     region = Column(String(100), nullable=True)
     date_of_birth = Column(Date, nullable=True)
     is_verified = Column(Boolean, default=False, nullable=False, server_default="false")

@@ -72,8 +72,13 @@ def create_tables():
     # users jadvaliga yangi ustunlarni qo'shish (idempotent)
     with engine.begin() as conn:
         conn.execute(text(
-            "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(500)"
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT"
         ))
+        # Eski VARCHAR(500) ni TEXT'ga o'tkazish (base64 data URL'lar uchun)
+        try:
+            conn.execute(text("ALTER TABLE users ALTER COLUMN avatar_url TYPE TEXT"))
+        except Exception as e:
+            logging.info("avatar_url TYPE migration: %s", e)
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS region VARCHAR(100)"
         ))

@@ -194,7 +194,13 @@ async def upload_avatar(
     current_user: User = Depends(require_auth),
     db: Session = Depends(get_db),
 ):
-    """Avatar rasmini yuklash. JPEG/PNG/WebP/GIF, max 5 MB."""
+    """Avatar rasmini yuklash. Bevosita DB'ga base64 sifatida saqlanadi.
+
+    Render bepul tier'da fayl tizimi vaqtinchalik (har restart'da o'chadi),
+    shuning uchun rasm fayl o'rniga DB'ga (data URL) saqlanadi.
+    """
+    import base64
+
     if file.content_type not in ALLOWED_IMAGE_TYPES:
         raise HTTPException(
             status_code=400,
@@ -205,31 +211,15 @@ async def upload_avatar(
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="Rasm hajmi 5 MB dan oshmasligi kerak")
 
-    # Eski avatarni o'chirish
-    if current_user.avatar_url:
-        old_filename = current_user.avatar_url.split("/")[-1]
-        old_path = os.path.join(AVATAR_DIR, old_filename)
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except OSError:
-                pass
+    # Base64 data URL sifatida saqlash
+    b64 = base64.b64encode(content).decode("ascii")
+    data_url = f"data:{file.content_type};base64,{b64}"
 
-    # Yangi faylni saqlash
-    ext = file.content_type.split("/")[-1]
-    if ext == "jpeg":
-        ext = "jpg"
-    filename = f"user_{current_user.id}_{uuid.uuid4().hex[:8]}.{ext}"
-    save_path = os.path.join(AVATAR_DIR, filename)
-    with open(save_path, "wb") as f:
-        f.write(content)
-
-    avatar_url = f"/static/avatars/{filename}"
-    current_user.avatar_url = avatar_url
+    current_user.avatar_url = data_url
     current_user.updated_at = datetime.utcnow()
     db.commit()
 
-    return {"avatar_url": avatar_url, "message": "Avatar yangilandi"}
+    return {"avatar_url": data_url, "message": "Avatar yangilandi"}
 
 
 @router.delete("/delete-avatar")
@@ -238,16 +228,9 @@ def delete_avatar(
     db: Session = Depends(get_db),
 ):
     """Avatarni o'chirish."""
-    if current_user.avatar_url:
-        filename = current_user.avatar_url.split("/")[-1]
-        path = os.path.join(AVATAR_DIR, filename)
-        if os.path.exists(path):
-            try:
-                os.remove(path)
-            except OSError:
-                pass
-        current_user.avatar_url = None
-        db.commit()
+    current_user.avatar_url = None
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
     return {"message": "Avatar o'chirildi"}
 
 

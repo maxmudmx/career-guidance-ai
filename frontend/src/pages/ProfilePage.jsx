@@ -15,7 +15,9 @@ function staticBase() {
 
 function fullAvatar(url) {
   if (!url) return null;
-  if (url.startsWith('blob:') || url.startsWith('http')) return url;
+  // data: URL (base64), blob:, http(s) — to'g'ridan-to'g'ri ishlatamiz
+  if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('http')) return url;
+  // Eski /static/avatars/... — backend URL'iga prefix qo'shamiz (eski rasmlar uchun)
   return `${staticBase()}${url}`;
 }
 
