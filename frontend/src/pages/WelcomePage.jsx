@@ -390,7 +390,6 @@ export default function WelcomePage({ onStart }) {
                 border: '1px solid rgba(239,68,68,0.3)',
               }}
             >
-              <AlertTriangle className="w-3.5 h-3.5" />
               Bugungi haqiqat
             </div>
             <h2
@@ -477,7 +476,6 @@ export default function WelcomePage({ onStart }) {
               border: '1px solid rgba(34,197,94,0.3)',
             }}
           >
-            <CheckCircle className="w-3.5 h-3.5" />
             Yechim mavjud
           </div>
           <h2
@@ -558,11 +556,8 @@ export default function WelcomePage({ onStart }) {
               </h2>
               <div className="space-y-4">
                 {BENEFITS.map((benefit, i) => (
-                  <div key={i} className="flex items-start gap-3">
-                    <CheckCircle
-                      className="w-5 h-5 flex-shrink-0 mt-0.5"
-                      style={{ color: 'var(--success)' }}
-                    />
+                  <div key={i} className="flex items-start gap-2">
+                    <span style={{ color: 'var(--accent)' }}>·</span>
                     <span style={{ color: 'var(--text)' }}>{benefit}</span>
                   </div>
                 ))}
