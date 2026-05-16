@@ -35,6 +35,8 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   me: () => api.get('/auth/me'),
+  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
+  resendVerification: (email) => api.post('/auth/resend-verification', { email }),
 };
 
 export const tokenStorage = {

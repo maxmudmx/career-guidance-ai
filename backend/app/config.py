@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
 
+    # Email yuborish (Brevo HTTP API)
+    BREVO_API_KEY: str = ""
+    EMAIL_FROM: str = ""
+    EMAIL_FROM_NAME: str = "Kasbim"
+    EMAIL_VERIFICATION_TTL_MINUTES: int = 15
+
     class Config:
         env_file = ".env"
         extra = "ignore"

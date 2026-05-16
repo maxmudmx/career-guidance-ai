@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { authAPI, tokenStorage } from '../services/api';
 import SignUpForm from './auth/SignUpForm';
 import LoginForm from './auth/LoginForm';
+import PendingVerify from './auth/PendingVerify';
 import { Card } from '../components/ui';
 
 function isValidEmail(email) {
@@ -27,13 +28,17 @@ function validateLogin({ username, password }) {
 }
 
 export default function AuthPage({ onAuth }) {
-  const [mode, setMode] = useState('login'); // 'login' | 'signup'
+  const [mode, setMode] = useState('login');
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [remember, setRemember] = useState(true);
+
+  // Email tasdiqlash holati
+  const [pendingVerify, setPendingVerify] = useState(null);
+  const [resendState, setResendState] = useState({ loading: false, sent: false, error: '' });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,6 +55,22 @@ export default function AuthPage({ onAuth }) {
     setAgreed(false);
   };
 
+  const handleResend = async () => {
+    if (!pendingVerify?.email) return;
+    setResendState({ loading: true, sent: false, error: '' });
+    try {
+      await authAPI.resendVerification(pendingVerify.email);
+      setResendState({ loading: false, sent: true, error: '' });
+    } catch (err) {
+      const detail = err.response?.data?.detail;
+      setResendState({
+        loading: false,
+        sent: false,
+        error: typeof detail === 'string' ? detail : "Birozdan keyin urinib ko'ring.",
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validate = mode === 'signup' ? validateRegister : validateLogin;
@@ -62,20 +83,35 @@ export default function AuthPage({ onAuth }) {
     setLoading(true);
     setServerError('');
     try {
-      const res = mode === 'signup'
-        ? await authAPI.register({
-            username: form.username,
-            email: form.email,
-            password: form.password,
-            full_name: form.username,
-          })
-        : await authAPI.login({ username: form.username, password: form.password });
-
-      tokenStorage.set(res.data.access_token);
-      tokenStorage.setUser(res.data.user);
-      onAuth(res.data.user, res.data.access_token);
+      if (mode === 'signup') {
+        const res = await authAPI.register({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+          full_name: form.username,
+        });
+        // Register endi token qaytarmaydi — kod yuborilgan deb javob qaytaradi
+        setPendingVerify({ email: res.data.email || form.email, fromRegister: true });
+        setResendState({ loading: false, sent: false, error: '' });
+      } else {
+        const res = await authAPI.login({ username: form.username, password: form.password });
+        tokenStorage.set(res.data.access_token);
+        tokenStorage.setUser(res.data.user);
+        onAuth(res.data.user, res.data.access_token);
+      }
     } catch (err) {
       const detail = err.response?.data?.detail;
+      // 403 + email_not_verified → kod kiritish sahifasiga o'tish
+      if (
+        err.response?.status === 403 &&
+        detail &&
+        typeof detail === 'object' &&
+        detail.code === 'email_not_verified'
+      ) {
+        setPendingVerify({ email: detail.email, fromRegister: false });
+        setResendState({ loading: false, sent: false, error: '' });
+        return;
+      }
       const msg = Array.isArray(detail)
         ? detail.map((d) => d.msg).join(', ')
         : (typeof detail === 'string' ? detail : detail?.message) ||
@@ -86,6 +122,31 @@ export default function AuthPage({ onAuth }) {
     }
   };
 
+  /* ── Email tasdiqlash kutilayotgan ekran ── */
+  if (pendingVerify) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6 py-12 font-sans"
+        style={{ background: 'var(--bg)' }}>
+        <PendingVerify
+          email={pendingVerify.email}
+          fromRegister={pendingVerify.fromRegister}
+          resendState={resendState}
+          onResend={handleResend}
+          onVerified={(user) => {
+            setPendingVerify(null);
+            if (user) onAuth(user);
+          }}
+          onBack={() => {
+            setPendingVerify(null);
+            setResendState({ loading: false, sent: false, error: '' });
+            setMode('login');
+            setForm({ username: '', email: '', password: '' });
+          }}
+        />
+      </div>
+    );
+  }
+
   const isSignup = mode === 'signup';
 
   return (
@@ -93,18 +154,6 @@ export default function AuthPage({ onAuth }) {
       className="min-h-screen flex items-center justify-center px-6 py-12 font-sans relative overflow-hidden"
       style={{ background: 'var(--bg)' }}
     >
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: '15%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 500,
-          height: 350,
-          background:
-            'radial-gradient(ellipse at center, rgba(59,130,246,0.12) 0%, transparent 70%)',
-        }}
-      />
       <div className="w-full max-w-sm relative z-10">
         <div className="text-center mb-8">
           <h2
@@ -153,7 +202,7 @@ export default function AuthPage({ onAuth }) {
               type="button"
               onClick={() => switchMode(isSignup ? 'login' : 'signup')}
               className="font-semibold hover:underline transition-colors"
-              style={{ color: 'var(--accent)' }}
+              style={{ color: 'var(--text)' }}
             >
               {isSignup ? 'Kirish' : "Ro'yxatdan o'tish"}
             </button>
