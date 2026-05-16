@@ -1,28 +1,22 @@
 import { useState } from 'react';
 import {
-  Settings, Moon, Sun, LogOut, Info, ArrowLeft, Brain,
+  Settings, Moon, Sun, LogOut, Info, Brain,
 } from 'lucide-react';
-import { Button, Card } from '../components/ui';
+import { Card } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 
 
-export default function SettingsPage({ user, onBack, onLogout }) {
+export default function SettingsPage({ user, onLogout }) {
   const { theme, toggle } = useTheme();
   const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6" style={{ background: 'var(--bg)' }}>
       <div className="max-w-xl mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <Button variant="secondary" onClick={onBack}>
-            <ArrowLeft size={16} /> Orqaga
-          </Button>
-          <h1 className="text-2xl font-bold mt-5 flex items-center gap-2" style={{ color: 'var(--text)' }}>
-            <Settings className="w-6 h-6" style={{ color: 'var(--accent)' }} />
-            Sozlamalar
-          </h1>
-        </div>
+        <h1 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--text)' }}>
+          <Settings className="w-6 h-6" style={{ color: 'var(--accent)' }} />
+          Sozlamalar
+        </h1>
 
         {/* Theme toggle (switch) */}
         <Card className="overflow-hidden mb-3">
