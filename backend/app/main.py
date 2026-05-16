@@ -71,6 +71,10 @@ def create_tables():
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE"
         ))
+        # 6 raqamli kodlar uchun token unique cheklovini olib tashlash
+        conn.execute(text(
+            "ALTER TABLE email_verifications DROP CONSTRAINT IF EXISTS email_verifications_token_key"
+        ))
 
 # Static fayllar (avatarlar)
 _static_dir = os.path.join(os.path.dirname(__file__), "..", "static")

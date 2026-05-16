@@ -131,6 +131,10 @@ export default function AuthPage({ onAuth }) {
           fromRegister={pendingVerify.fromRegister}
           resendState={resendState}
           onResend={handleResend}
+          onVerified={(user) => {
+            setPendingVerify(null);
+            if (user) onAuth(user);
+          }}
           onBack={() => {
             setPendingVerify(null);
             setResendState({ loading: false, sent: false, error: '' });

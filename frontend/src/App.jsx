@@ -6,7 +6,6 @@ import AcademicSkills from './pages/AcademicSkills';
 import Dashboard from './pages/Dashboard';
 import AuthPage from './pages/AuthPage';
 import ProfilePage from './pages/ProfilePage';
-import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmailBanner from './components/VerifyEmailBanner';
 import SettingsPage from './pages/SettingsPage';
@@ -532,13 +531,6 @@ export default function App() {
   const showMyGoal = route === '/my-goal';
   const showCareerProfile = route === '/career-profile';
 
-  // ---- Email verification token (URL'dan) ----
-  const [verifyToken, setVerifyToken] = useState(() => {
-    if (typeof window === 'undefined') return null;
-    const params = new URLSearchParams(window.location.search);
-    return params.get('verify_token');
-  });
-
   // ---- Password reset token (URL'dan) ----
   const [resetToken, setResetToken] = useState(() => {
     if (typeof window === 'undefined') return null;
@@ -559,14 +551,6 @@ export default function App() {
       .catch(() => tokenStorage.clear())
       .finally(() => setAuthChecked(true));
   }, []);
-
-  // Verifikatsiya muvaffaqiyatli bo'lsa, foydalanuvchi ma'lumotini yangilash
-  const handleVerifyDone = () => {
-    setVerifyToken(null);
-    if (tokenStorage.get()) {
-      authAPI.me().then(res => setAuthUser(res.data)).catch(() => {});
-    }
-  };
 
   const handleAuth = (user) => {
     setAuthUser(user);
@@ -646,10 +630,6 @@ export default function App() {
 
   const chatContext = predictions?.[0] ? `${predictions[0].name_uz} (${predictions[0].score}% moslik)` : null;
 
-  // Email verifikatsiya — URL'da ?verify_token=xxx bo'lsa, hammadan oldin ko'rsatish
-  if (verifyToken) {
-    return <VerifyEmail token={verifyToken} onDone={handleVerifyDone} />;
-  }
 
   // Parolni tiklash — URL'da ?reset_token=xxx bo'lsa
   if (resetToken) {

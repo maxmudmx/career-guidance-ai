@@ -40,7 +40,7 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   googleLogin: (credential) => api.post('/auth/google', { credential }),
   me: () => api.get('/auth/me'),
-  verifyEmail: (token) => api.post('/auth/verify-email', { token }),
+  verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
   resendVerification: (email) => api.post('/auth/resend-verification', { email }),
   // Parolni tiklash
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),

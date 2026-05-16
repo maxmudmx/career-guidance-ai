@@ -13,15 +13,21 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     HH_API_TOKEN: str = ""
 
-    # SMTP (Gmail) — email tasdiqlash uchun
+    # Email yuborish — Brevo HTTP API (Render bepul rejasi SMTP'ni bloklaydi)
+    BREVO_API_KEY: str = ""
+    EMAIL_FROM: str = ""              # Brevo'da tasdiqlangan sender email
+    EMAIL_FROM_NAME: str = "Kasbim"
+
+    # SMTP (lokal dev fallback uchun)
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
-    SMTP_USER: str = ""               # Gmail manzilingiz
-    SMTP_PASSWORD: str = ""           # Gmail App Password (16 belgili, bo'shliqsiz)
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
     SMTP_FROM_NAME: str = "Kasbim"
+
     FRONTEND_URL: str = "http://localhost:5173"
-    EMAIL_VERIFICATION_TTL_HOURS: int = 24
-    PASSWORD_RESET_TTL_HOURS: int = 2  # parolni tiklash havolasi 2 soat amal qiladi
+    EMAIL_VERIFICATION_TTL_MINUTES: int = 15  # 6 raqamli kod 15 daqiqa amal qiladi
+    PASSWORD_RESET_TTL_HOURS: int = 2
 
     class Config:
         env_file = ".env"

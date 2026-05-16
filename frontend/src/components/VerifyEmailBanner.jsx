@@ -50,7 +50,7 @@ export default function VerifyEmailBanner({ user, onDismiss }) {
           </div>
           <div className="text-xs text-[#92400E]/80 leading-relaxed">
             <strong className="text-[#92400E]">{user.email}</strong> manziliga yuborilgan
-            havolani bosing. Spam papkasini ham tekshiring.
+            6 raqamli kodni kiriting. Spam papkasini ham tekshiring.
           </div>
         </div>
 

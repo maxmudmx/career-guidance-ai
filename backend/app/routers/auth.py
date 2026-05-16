@@ -130,22 +130,22 @@ def _user_to_dict(user: User) -> dict:
 
 
 def _create_verification_token(db: Session, user: User) -> str:
-    """Foydalanuvchi uchun yangi verifikatsiya tokenini yaratadi.
-    Eski ishlatilmagan tokenlar bekor qilinadi."""
+    """Foydalanuvchi uchun 6 raqamli tasdiqlash kodi yaratadi.
+    Eski ishlatilmagan kodlar bekor qilinadi."""
     db.query(EmailVerification).filter(
         EmailVerification.user_id == user.id,
         EmailVerification.used_at.is_(None),
     ).update({"used_at": datetime.utcnow()})
 
-    token = secrets.token_urlsafe(48)
+    code = f"{secrets.randbelow(1000000):06d}"
     rec = EmailVerification(
         user_id=user.id,
-        token=token,
-        expires_at=datetime.utcnow() + timedelta(hours=settings.EMAIL_VERIFICATION_TTL_HOURS),
+        token=code,
+        expires_at=datetime.utcnow() + timedelta(minutes=settings.EMAIL_VERIFICATION_TTL_MINUTES),
     )
     db.add(rec)
     db.commit()
-    return token
+    return code
 
 
 # ---- Endpointlar ----
@@ -195,8 +195,8 @@ def register(
     return RegisterResponse(
         ok=True,
         message=(
-            "Ro'yxatdan o'tdingiz! Emailingizga tasdiqlash havolasi yubordik. "
-            "Pochtangizdagi havolani bosing va keyin tizimga kiring."
+            "Ro'yxatdan o'tdingiz! Emailingizga 6 raqamli tasdiqlash kodini yubordik. "
+            "Kodni saytda kiriting."
         ),
         email=user.email,
     )
@@ -205,7 +205,8 @@ def register(
 # ---- Email verification endpointlari ----
 
 class VerifyEmailRequest(BaseModel):
-    token: str
+    email: EmailStr
+    code: str
 
 
 class ResendVerificationRequest(BaseModel):
@@ -214,37 +215,37 @@ class ResendVerificationRequest(BaseModel):
 
 @router.post("/verify-email")
 def verify_email(data: VerifyEmailRequest, db: Session = Depends(get_db)):
-    """Token orqali emailni tasdiqlash.
-
-    Idempotent: bir token bir necha marta yuborilsa (React Strict Mode ikki marta
-    chaqirishi yoki email klient link'ni preview qilishi natijasida), 60 sekund
-    ichida takroriy chaqiruv ham muvaffaqiyatli javob qaytaradi.
-    """
-    rec = db.query(EmailVerification).filter(EmailVerification.token == data.token).first()
-    if not rec:
-        raise HTTPException(status_code=400, detail="Havola noto'g'ri yoki bekor qilingan.")
-
-    user = db.query(User).filter(User.id == rec.user_id).first()
+    """Email + 6 raqamli kod orqali emailni tasdiqlash."""
+    user = db.query(User).filter(User.email == str(data.email).lower()).first()
     if not user:
-        raise HTTPException(status_code=404, detail="Foydalanuvchi topilmadi.")
+        raise HTTPException(status_code=400, detail="Email yoki kod noto'g'ri.")
 
-    # Token allaqachon ishlatilgan
-    if rec.used_at is not None:
-        # Yaqinda ishlatilgan + user verified → idempotent muvaffaqiyat
-        recently_used = (datetime.utcnow() - rec.used_at).total_seconds() < 60
-        if user.is_verified and recently_used:
-            access_token = create_token({"user_id": user.id, "username": user.username})
-            return {
-                "ok": True,
-                "message": "Email tasdiqlangan.",
-                "user": _user_to_dict(user),
-                "access_token": access_token,
-                "token_type": "bearer",
-            }
-        raise HTTPException(status_code=400, detail="Bu havola allaqachon ishlatilgan.")
+    # Idempotent: agar foydalanuvchi allaqachon tasdiqlangan bo'lsa, login qaytaramiz
+    if user.is_verified:
+        access_token = create_token({"user_id": user.id, "username": user.username})
+        return {
+            "ok": True,
+            "message": "Email allaqachon tasdiqlangan.",
+            "user": _user_to_dict(user),
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+
+    code = data.code.strip().replace(" ", "")
+    rec = (
+        db.query(EmailVerification)
+        .filter(
+            EmailVerification.user_id == user.id,
+            EmailVerification.token == code,
+            EmailVerification.used_at.is_(None),
+        )
+        .first()
+    )
+    if not rec:
+        raise HTTPException(status_code=400, detail="Email yoki kod noto'g'ri.")
 
     if rec.expires_at < datetime.utcnow():
-        raise HTTPException(status_code=400, detail="Havola muddati tugagan. Qaytadan jo'natishni so'rang.")
+        raise HTTPException(status_code=400, detail="Kod muddati tugagan. Yangi kod so'rang.")
 
     user.is_verified = True
     rec.used_at = datetime.utcnow()
@@ -325,7 +326,7 @@ def login(data: UserLogin, db: Session = Depends(get_db)):
             status_code=403,
             detail={
                 "code": "email_not_verified",
-                "message": "Emailingiz hali tasdiqlanmagan. Pochtangizdagi havolani bosing yoki yangi havola so'rang.",
+                "message": "Emailingiz hali tasdiqlanmagan. Pochtangizdagi 6 raqamli kodni kiriting.",
                 "email": user.email,
             },
         )
