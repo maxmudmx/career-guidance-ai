@@ -137,50 +137,64 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
       style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex justify-between items-center h-16">
-          <button
-            onClick={() => onNavigate('home')}
-            className="text-lg font-bold hover:opacity-80 transition-opacity"
-            style={{ color: 'var(--text)' }}
-          >
-            Kasbim
-          </button>
+        <div className="grid grid-cols-3 items-center h-16">
+          {/* Left: Logo */}
+          <div className="flex items-center justify-start">
+            <button
+              onClick={() => onNavigate('home')}
+              className="text-lg font-bold hover:opacity-80 transition-opacity"
+              style={{ color: 'var(--text)' }}
+            >
+              Kasbim
+            </button>
+          </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            {user ? (
+          {/* Center: Nav links */}
+          <div className="hidden md:flex items-center justify-center gap-2">
+            {user && (
               <>
                 <NavLink label={t('nav.home')} target="home" />
                 <NavLink label={t('nav.test')} target="test" />
                 <NavLink label={t('nav.history')} target="history" />
-                <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />
                 <NavLink label={t('nav.contact')} target="contact" />
-                <ThemeToggleButton />
-                <LanguageDropdown />
-                <button
-                  onClick={onLogout}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity hover:opacity-70"
-                  style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-                >
-                  {t('nav.logout')}
-                </button>
-              </>
-            ) : (
-              <>
-                <ThemeToggleButton />
-                <LanguageDropdown />
-                <button
-                  onClick={onStartTest}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
-                  style={{ background: 'var(--text)', color: 'var(--bg)' }}
-                >
-                  {t('nav.login_register')}
-                </button>
               </>
             )}
           </div>
 
-          <div className="md:hidden flex items-center gap-1.5">
+          {/* Right: Theme + Lang + Profile icon (or Login button) */}
+          <div className="hidden md:flex items-center justify-end gap-2">
+            <ThemeToggleButton />
+            <LanguageDropdown />
+            {user ? (
+              <button
+                onClick={() => onNavigate('profile')}
+                className="w-10 h-10 rounded-lg flex items-center justify-center transition-opacity hover:opacity-70"
+                style={{
+                  background: route === 'profile' ? 'var(--accent-soft)' : 'var(--bg-hover)',
+                  color: 'var(--text)',
+                }}
+                aria-label={t('nav.profile')}
+                title={t('nav.profile')}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </button>
+            ) : (
+              <button
+                onClick={onStartTest}
+                className="px-4 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105"
+                style={{ background: 'var(--text)', color: 'var(--bg)' }}
+              >
+                {t('nav.login_register')}
+              </button>
+            )}
+          </div>
+
+          {/* Mobile right */}
+          <div className="md:hidden flex items-center justify-end gap-1.5">
             <ThemeToggleButton />
             <LanguageDropdown />
             <button
@@ -203,16 +217,9 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink label={t('nav.home')} target="home" />
                 <NavLink label={t('nav.test')} target="test" />
                 <NavLink label={t('nav.history')} target="history" />
-                <NavLink label={t('nav.profile')} target="profile" />
                 <NavLink label={t('nav.settings')} target="settings" />
                 <NavLink label={t('nav.contact')} target="contact" />
-                <button
-                  onClick={onLogout}
-                  className="px-3 py-1.5 rounded-lg text-sm font-medium opacity-70 hover:opacity-100 text-left"
-                  style={{ color: 'var(--text)' }}
-                >
-                  {t('nav.logout')}
-                </button>
+                <NavLink label={t('nav.profile')} target="profile" />
               </>
             ) : (
               <button
