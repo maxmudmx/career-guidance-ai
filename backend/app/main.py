@@ -46,6 +46,24 @@ app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
 
 @app.on_event("startup")
+def maybe_reset_db():
+    """⚠️ Bir martalik: agar RESET_USERS=yes env var bo'lsa, barcha userlarni o'chiradi.
+
+    Foydalanish: Render env vars'ga RESET_USERS=yes qo'ying, save bosing
+    (avtomatik restart bo'ladi), keyin RESET_USERS env var'ini O'CHIRING.
+    """
+    if os.environ.get("RESET_USERS", "").lower() in ("yes", "true", "1"):
+        from sqlalchemy import text
+        from app.database import engine
+        try:
+            with engine.begin() as conn:
+                conn.execute(text("TRUNCATE TABLE users CASCADE"))
+            logging.warning("⚠️ BARCHA USERLAR O'CHIRILDI (RESET_USERS=yes)")
+        except Exception as e:
+            logging.exception("Reset xatosi: %s", e)
+
+
+@app.on_event("startup")
 def create_tables():
     """DB jadvallarini yaratish va sodda migration."""
     from sqlalchemy import text
