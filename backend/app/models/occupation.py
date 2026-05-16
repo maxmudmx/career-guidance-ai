@@ -1,4 +1,4 @@
-"""Kasblar modeli."""
+"""Kasblar modeli (recsys uchun)."""
 
 from datetime import datetime
 
@@ -9,37 +9,22 @@ from app.database import Base
 
 
 class Occupation(Base):
+    """Kasb — recommender system uchun 'item'.
+
+    feature_vector — N o'lchamli xususiyatlar vektori (RIASEC + ko'nikmalar + akademik).
+    Bu Content-Based Filtering uchun ishlatiladi.
+    """
     __tablename__ = "occupations"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
     name_uz = Column(String(200), nullable=False)
-    description = Column(Text)
     description_uz = Column(Text)
-    required_skills = Column(ARRAY(String), nullable=False)
-    avg_salary = Column(String(50))
-    riasec_profile = Column(JSONB, nullable=False)
-    roadmap = Column(JSONB)
     category = Column(String(100))
-    demand_level = Column(String(20), default="medium")
+
+    # Recommender features
+    feature_vector = Column(JSONB, nullable=False)  # N-dim vector (key → value)
+    riasec_profile = Column(JSONB, nullable=False)  # {R,I,A,S,E,C → ideal value}
+    required_skills = Column(ARRAY(String))
+
     created_at = Column(DateTime, default=datetime.utcnow)
-
-
-class ResumeAnalysis(Base):
-    __tablename__ = "resume_analyses"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False)
-    file_name = Column(String(255))
-    extracted_keywords = Column(ARRAY(String))
-    matched_occupation_id = Column(Integer)
-    match_percentage = Column(Integer)
-    analysis_result = Column(JSONB)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    from sqlalchemy import ForeignKey
-    from sqlalchemy.orm import relationship
-
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    matched_occupation_id = Column(Integer, ForeignKey("occupations.id"), nullable=True)
-    user = relationship("User", back_populates="resume_analyses")
