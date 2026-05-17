@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
+import { ChevronDown } from './ChevronDown';
 
 const RIASEC_ORDER = ['R', 'I', 'A', 'S', 'E', 'C'];
 
@@ -299,12 +300,7 @@ function RecommendationCard({ rank, career, t }) {
           <div className="flex items-center justify-center gap-1.5 mt-3 pt-2 border-t text-xs"
             style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
             {open ? t('detail.collapse') : t('detail.show_more')}
-            <span
-              className="transition-transform"
-              style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-            >
-              ▾
-            </span>
+            <ChevronDown open={open} size={14} />
           </div>
         )}
       </button>

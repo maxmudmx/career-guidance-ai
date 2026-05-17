@@ -16,6 +16,7 @@ import ContactPage from './pages/ContactPage';
 import TestDetailPage from './pages/TestDetailPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import { authAPI, tokenStorage } from './services/api';
+import { ChevronDown } from './components/ChevronDown';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
 import { LANGUAGE_OPTIONS } from './i18n/translations';
@@ -72,12 +73,7 @@ function LanguageDropdown() {
         style={{ color: 'var(--text)' }}
       >
         {current.flag}
-        <span
-          className="transition-transform"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          ▾
-        </span>
+        <ChevronDown open={open} />
       </button>
 
       {open && (

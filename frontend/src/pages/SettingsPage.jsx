@@ -3,6 +3,7 @@ import { Card } from '../components/ui';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../contexts/LanguageContext';
 import { LANGUAGE_OPTIONS } from '../i18n/translations';
+import { ChevronDown } from '../components/ChevronDown';
 
 
 export default function SettingsPage({ user, onLogout, onNavigate }) {
@@ -61,14 +62,8 @@ export default function SettingsPage({ user, onLogout, onNavigate }) {
                 {t('settings.about.desc')}
               </div>
             </div>
-            <span
-              className="text-xl font-bold transition-transform"
-              style={{
-                color: 'var(--text-muted)',
-                transform: aboutOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-              }}
-            >
-              ▾
+            <span style={{ color: 'var(--text-muted)' }}>
+              <ChevronDown open={aboutOpen} size={16} />
             </span>
           </button>
 
@@ -198,12 +193,7 @@ function LanguageDropdown({ lang, setLang }) {
         style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
       >
         {current.flag}
-        <span
-          className="text-xs transition-transform"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          ▾
-        </span>
+        <ChevronDown open={open} size={14} />
       </button>
 
       {open && (

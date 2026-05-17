@@ -1,19 +1,12 @@
 import { Button, Card } from '../components/ui';
 import { useTranslation } from '../contexts/LanguageContext';
 
-const RULES_KEYS = [
-  'test_intro.rule1',
-  'test_intro.rule2',
-  'test_intro.rule3',
-  'test_intro.rule4',
-];
-
 export default function TestIntroPage({ onStart }) {
   const { t } = useTranslation();
   const STEPS = [
-    { n: '1', title: t('test_intro.step1.title'), desc: t('test_intro.step1.desc'), time: t('test_intro.step1.time') },
-    { n: '2', title: t('test_intro.step2.title'), desc: t('test_intro.step2.desc'), time: t('test_intro.step2.time') },
-    { n: '3', title: t('test_intro.step3.title'), desc: t('test_intro.step3.desc'), time: t('test_intro.step3.time') },
+    { n: '1', title: t('test_intro.step1.title'), desc: t('test_intro.step1.desc') },
+    { n: '2', title: t('test_intro.step2.title'), desc: t('test_intro.step2.desc') },
+    { n: '3', title: t('test_intro.step3.title'), desc: t('test_intro.step3.desc') },
   ];
   return (
     <div
@@ -35,16 +28,6 @@ export default function TestIntroPage({ onStart }) {
             {t('test_intro.subtitle')}
           </p>
 
-          <div
-            className="inline-flex items-center gap-2 mt-4 px-3 py-1.5 rounded-full text-xs font-medium"
-            style={{
-              background: 'var(--accent-soft)',
-              border: '1px solid var(--accent-border)',
-              color: 'var(--accent)',
-            }}
-          >
-            {t('test_intro.total_time')}
-          </div>
         </div>
 
         <Card className="p-5 mb-6">
@@ -64,14 +47,9 @@ export default function TestIntroPage({ onStart }) {
                   {s.n}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
-                      {s.title}
-                    </h3>
-                    <span className="text-xs" style={{ color: 'var(--text-faint)' }}>
-                      {s.time}
-                    </span>
-                  </div>
+                  <h3 className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                    {s.title}
+                  </h3>
                   <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>
                     {s.desc}
                   </p>
