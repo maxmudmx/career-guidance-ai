@@ -132,6 +132,7 @@ export const translations = {
     'history.riasec_scores': 'RIASEC natijalari',
     'history.interests': 'Qiziqishlar',
     'history.subjects': 'Fanlar',
+    'history.why_match': "Nima uchun mos:",
 
     // ─── Profile ────────────────────────────────
     'profile.online': 'onlayn',
@@ -416,6 +417,7 @@ export const translations = {
     'history.riasec_scores': 'RIASEC scores',
     'history.interests': 'Interests',
     'history.subjects': 'Subjects',
+    'history.why_match': 'Why this matches:',
     'history.best_match': 'Best recommendation',
     'history.match_label': 'Match:',
     'history.dominant_riasec': 'Dominant RIASEC',
@@ -705,6 +707,7 @@ export const translations = {
     'history.riasec_scores': 'Результаты RIASEC',
     'history.interests': 'Интересы',
     'history.subjects': 'Предметы',
+    'history.why_match': 'Почему подходит:',
     'history.best_match': 'Лучшая рекомендация',
     'history.match_label': 'Совпадение:',
     'history.dominant_riasec': 'Доминирующий RIASEC',
