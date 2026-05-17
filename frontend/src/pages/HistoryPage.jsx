@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { userAPI } from '../services/api';
 import { useTranslation } from '../contexts/LanguageContext';
+import TestResultDetail from '../components/TestResultDetail';
 
 export default function HistoryPage({ onBack }) {
   const { t, lang } = useTranslation();
@@ -108,14 +109,7 @@ export default function HistoryPage({ onBack }) {
 
 function HistoryItem({ item, index, isOpen, onToggle, onDelete, isDeleting, formatDate, t }) {
   const recs = item.recommendations || [];
-  const riasecScores = item.riasec_scores || {};
-  const interests = item.academic_data?.interests || [];
-  const subjects = item.academic_data?.subjects || [];
   const topCareer = recs[0];
-
-  const riasecSorted = Object.entries(riasecScores)
-    .map(([k, v]) => ({ key: k, value: Number(v) }))
-    .sort((a, b) => b.value - a.value);
 
   return (
     <Card className="overflow-hidden">
@@ -150,119 +144,18 @@ function HistoryItem({ item, index, isOpen, onToggle, onDelete, isDeleting, form
         </span>
       </button>
 
-      {/* Expanded body */}
+      {/* Expanded body — uses TestResultDetail */}
       {isOpen && (
-        <div className="px-5 pb-5 pt-1 border-t" style={{ borderColor: 'var(--border)' }}>
-          {/* Recommendations with explanation */}
-          {recs.length > 0 && (
-            <div className="mb-5 mt-4">
-              <div className="text-xs uppercase font-semibold mb-3" style={{ color: 'var(--text-faint)' }}>
-                {t('history.recommendations')}
-              </div>
-              <div className="space-y-2">
-                {recs.map((r, i) => (
-                  <div
-                    key={i}
-                    className="p-3 rounded-lg"
-                    style={{ background: 'var(--bg-hover)' }}
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <span className="text-sm font-bold w-6 flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
-                          #{i + 1}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
-                            {r.name_uz || r.name}
-                          </div>
-                          <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
-                            {r.category}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-sm font-bold whitespace-nowrap" style={{ color: 'var(--text)' }}>
-                        {Math.round((r.score || 0) * 100)}%
-                      </div>
-                    </div>
-
-                    {/* Explanation — nima uchun mos */}
-                    {r.explanation && r.explanation.length > 0 && (
-                      <div className="ml-9 mt-2 pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-                        <div className="text-xs mb-1.5 font-medium" style={{ color: 'var(--text-faint)' }}>
-                          {t('history.why_match')}
-                        </div>
-                        <ul className="space-y-1">
-                          {r.explanation.map((ex, j) => (
-                            <li
-                              key={j}
-                              className="text-xs"
-                              style={{ color: 'var(--text-muted)' }}
-                            >
-                              · {ex}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* RIASEC */}
-          {riasecSorted.length > 0 && (
-            <div className="mb-5">
-              <div className="text-xs uppercase font-semibold mb-3" style={{ color: 'var(--text-faint)' }}>
-                {t('history.riasec_scores')}
-              </div>
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {riasecSorted.map(({ key, value }) => (
-                  <div
-                    key={key}
-                    className="text-center p-2 rounded-lg"
-                    style={{ background: 'var(--bg-hover)' }}
-                  >
-                    <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                      {key}
-                    </div>
-                    <div className="text-base font-bold" style={{ color: 'var(--text)' }}>
-                      {value.toFixed(1)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Interests + subjects */}
-          {(interests.length > 0 || subjects.length > 0) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-              {interests.length > 0 && (
-                <div>
-                  <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
-                    {t('history.interests')}
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    {interests.join(', ')}
-                  </div>
-                </div>
-              )}
-              {subjects.length > 0 && (
-                <div>
-                  <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
-                    {t('history.subjects')}
-                  </div>
-                  <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    {subjects.join(', ')}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+        <div className="px-5 pb-5 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+          <TestResultDetail
+            recommendations={recs}
+            riasecScores={item.riasec_scores || {}}
+            interests={item.academic_data?.interests || []}
+            subjects={item.academic_data?.subjects || []}
+          />
 
           {/* Delete button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-4">
             <button
               onClick={onDelete}
               disabled={isDeleting}

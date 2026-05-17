@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { recommendAPI } from '../services/api';
 import { useTranslation } from '../contexts/LanguageContext';
+import TestResultDetail from '../components/TestResultDetail';
 
 export default function ResultsPage({ riasecScores, academicData, onBack, onRetake }) {
   const { t } = useTranslation();
@@ -53,11 +54,6 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
             {t('results.subtitle_prefix')} ({totalCareers || '…'} {t('results.subtitle_suffix')})
           </p>
-          {method && (
-            <p className="text-xs mt-2 font-mono" style={{ color: 'var(--text-faint)' }}>
-              {t('results.algorithm_label')} {method}
-            </p>
-          )}
         </div>
 
         {loading && (
@@ -78,11 +74,12 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
         )}
 
         {!loading && !error && results.length > 0 && (
-          <div className="space-y-4">
-            {results.map((r, i) => (
-              <CareerResultCard key={r.id} rank={i + 1} career={r} />
-            ))}
-          </div>
+          <TestResultDetail
+            recommendations={results}
+            riasecScores={riasecScores}
+            interests={academicData?.interests || []}
+            subjects={academicData?.subjects || []}
+          />
         )}
 
         {!loading && (
@@ -97,59 +94,5 @@ export default function ResultsPage({ riasecScores, academicData, onBack, onReta
         )}
       </div>
     </div>
-  );
-}
-
-function CareerResultCard({ rank, career }) {
-  const { t } = useTranslation();
-  const confidence = Math.round(career.score * 100);
-
-  return (
-    <Card className="p-5">
-      <div className="flex items-center gap-2 mb-1 flex-wrap">
-        <span
-          className="text-xs font-semibold uppercase tracking-wide"
-          style={{ color: 'var(--text-faint)' }}
-        >
-          #{rank}  ·  {career.category}
-        </span>
-      </div>
-      <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text)' }}>
-        {career.name_uz}
-      </h3>
-
-      <div className="mb-3">
-        <div className="flex items-center justify-between text-xs mb-1">
-          <span style={{ color: 'var(--text-muted)' }}>{t('results.match')}</span>
-          <span className="font-bold" style={{ color: 'var(--accent)' }}>{confidence}%</span>
-        </div>
-        <div
-          className="h-2 rounded-full overflow-hidden"
-          style={{ background: 'var(--bg-hover)' }}
-        >
-          <div
-            className="h-full rounded-full"
-            style={{
-              width: `${confidence}%`,
-              background: 'var(--text)',
-            }}
-          />
-        </div>
-      </div>
-
-      {career.explanation?.length > 0 && (
-        <ul className="space-y-1 mt-2">
-          {career.explanation.map((ex, idx) => (
-            <li
-              key={idx}
-              className="text-xs"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              · {ex}
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
   );
 }
