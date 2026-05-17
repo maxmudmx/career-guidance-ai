@@ -91,6 +91,26 @@ def create_tables():
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()"
         ))
+
+        # test_results jadvalining yangi sxemaga moslashish
+        conn.execute(text(
+            "ALTER TABLE test_results ADD COLUMN IF NOT EXISTS recommendations JSONB"
+        ))
+        conn.execute(text(
+            "ALTER TABLE test_results ADD COLUMN IF NOT EXISTS academic_data JSONB"
+        ))
+        conn.execute(text(
+            "ALTER TABLE test_results ADD COLUMN IF NOT EXISTS user_skills VARCHAR[]"
+        ))
+        # Eski ustunlardan ba'zilari NOT NULL bo'lishi mumkin — nullable qilamiz
+        try:
+            conn.execute(text("ALTER TABLE test_results ALTER COLUMN predictions DROP NOT NULL"))
+        except Exception:
+            pass
+        try:
+            conn.execute(text("ALTER TABLE test_results ALTER COLUMN skills_gap DROP NOT NULL"))
+        except Exception:
+            pass
         # Mavjud foydalanuvchilarni grandfather qilish (1 daqiqa avval yaratilganlar)
         conn.execute(text(
             "UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"
