@@ -17,6 +17,7 @@ import TestDetailPage from './pages/TestDetailPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ChevronDown } from './components/ChevronDown';
+import { Logo } from './components/Logo';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useTranslation } from './contexts/LanguageContext';
 import { LANGUAGE_OPTIONS } from './i18n/translations';
@@ -153,9 +154,10 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           <div className="flex items-center justify-start flex-shrink-0">
             <button
               onClick={() => onNavigate('home')}
-              className="text-lg font-bold hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 text-lg font-bold hover:opacity-80 transition-opacity"
               style={{ color: 'var(--text)' }}
             >
+              <Logo size={22} />
               Kasbim
             </button>
           </div>
