@@ -21,6 +21,5 @@ class User(Base):
     date_of_birth = Column(Date, nullable=True)
     is_verified = Column(Boolean, default=False, nullable=False, server_default="false")
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     test_results = relationship("TestResult", back_populates="user", cascade="all, delete-orphan")

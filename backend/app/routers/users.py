@@ -171,12 +171,21 @@ def edit_profile(
     if data.new_password:
         current_user.password_hash = pwd_context.hash(data.new_password)
 
+    import logging
     try:
-        current_user.updated_at = datetime.utcnow()
-    except Exception:
-        pass  # updated_at ustun yo'q bo'lsa, e'tibor bermaymiz
-    db.commit()
-    db.refresh(current_user)
+        db.commit()
+        db.refresh(current_user)
+        logging.info(
+            "Profile saved for user %s: region=%s, dob=%s, avatar=%s",
+            current_user.username,
+            current_user.region,
+            current_user.date_of_birth,
+            'yes' if current_user.avatar_url else 'no',
+        )
+    except Exception as e:
+        db.rollback()
+        logging.exception("Profile save FAILED: %s", e)
+        raise HTTPException(status_code=500, detail=f"Saqlashda xatolik: {str(e)}")
 
     # Username o'zgargan bo'lsa yangi token
     new_token = create_token({"user_id": current_user.id, "username": current_user.username})
@@ -218,9 +227,15 @@ async def upload_avatar(
     b64 = base64.b64encode(content).decode("ascii")
     data_url = f"data:{file.content_type};base64,{b64}"
 
+    import logging
     current_user.avatar_url = data_url
-    current_user.updated_at = datetime.utcnow()
-    db.commit()
+    try:
+        db.commit()
+        logging.info("Avatar saved for user %s (%d bytes)", current_user.username, len(data_url))
+    except Exception as e:
+        db.rollback()
+        logging.exception("Avatar save FAILED: %s", e)
+        raise HTTPException(status_code=500, detail=f"Avatar saqlashda xatolik: {str(e)}")
 
     return {"avatar_url": data_url, "message": "Avatar yangilandi"}
 
@@ -232,7 +247,6 @@ def delete_avatar(
 ):
     """Avatarni o'chirish."""
     current_user.avatar_url = None
-    current_user.updated_at = datetime.utcnow()
     db.commit()
     return {"message": "Avatar o'chirildi"}
 
