@@ -158,7 +158,7 @@ export default function RiasecTest({ onComplete, onBack }) {
           {/* 6 ta kategoriya nuqtasi */}
           <div className="flex items-center justify-center gap-2">
             {categoryStatus.map((cat) => {
-              const info = CATEGORIES[cat.key];
+              const info = getCategory(cat.key);
               const isActive = question.category === cat.key;
               const cls = cat.completed
                 ? 'bg-[#16A34A] border-[#16A34A]'
