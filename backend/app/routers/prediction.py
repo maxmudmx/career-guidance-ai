@@ -188,9 +188,9 @@ def get_metadata():
         SKILL_CATEGORIES, SKILL_LEVELS, RIASEC_NAMES,
     )
     return {
-        "categories": [{"key": k, "name": v} for k, v in CATEGORIES.items()],
-        "interests": [{"key": k, "name": v} for k, v in INTERESTS.items()],
-        "subjects": [{"key": k, "name": v} for k, v in SUBJECTS.items()],
+        "categories": [{"key": k, "label": v, "name": v} for k, v in CATEGORIES.items()],
+        "interests": [{"key": k, "label": v, "name": v} for k, v in INTERESTS.items()],
+        "subjects": [{"key": k, "label": v, "name": v} for k, v in SUBJECTS.items()],
         "skill_categories": SKILL_CATEGORIES,
         "skill_levels": SKILL_LEVELS,
         "riasec_names": RIASEC_NAMES,
