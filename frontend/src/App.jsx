@@ -29,7 +29,7 @@ function ThemeToggleButton() {
       onClick={toggle}
       title={theme === 'dark' ? 'Light' : 'Dark'}
       className="p-2 rounded-lg transition-opacity hover:opacity-70 flex-shrink-0"
-      style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+      style={{ color: 'var(--text)' }}
     >
       {theme === 'dark' ? (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -67,8 +67,8 @@ function LanguageDropdown() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
-        style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
+        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+        style={{ color: 'var(--text)' }}
       >
         {current.flag}
         <span
@@ -187,7 +187,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 onClick={() => onNavigate('profile')}
                 className="w-10 h-10 rounded-lg flex items-center justify-center transition-opacity hover:opacity-70"
                 style={{
-                  background: route === 'profile' ? 'var(--accent-soft)' : 'var(--bg-hover)',
+                  background: route === 'profile' ? 'var(--accent-soft)' : 'transparent',
                   color: 'var(--text)',
                 }}
                 aria-label={t('nav.profile')}

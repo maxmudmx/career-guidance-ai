@@ -107,11 +107,11 @@ export default function SettingsPage({ user, onLogout, onNavigate }) {
                   {t('settings.password.desc')}
                 </div>
               </div>
-              <div
-                className="text-xs font-medium px-3 py-1 rounded-lg"
-                style={{ background: 'var(--bg-hover)', color: 'var(--text-muted)' }}
-              >
-                {t('settings.password.btn')}
+              <div className="flex-shrink-0" style={{ color: 'var(--text-muted)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9"/>
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>
+                </svg>
               </div>
             </button>
           </Card>
