@@ -117,7 +117,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
   const NavLink = ({ label, target, primary }) => (
     <button
       onClick={() => { onNavigate(target); setMenuOpen(false); }}
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
         route === target ? 'opacity-100' : 'opacity-70 hover:opacity-100'
       }`}
       style={{
@@ -137,9 +137,9 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
       style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-3 items-center h-16">
+        <div className="flex items-center h-16 gap-4">
           {/* Left: Logo */}
-          <div className="flex items-center justify-start">
+          <div className="flex items-center justify-start flex-shrink-0">
             <button
               onClick={() => onNavigate('home')}
               className="text-lg font-bold hover:opacity-80 transition-opacity"
@@ -150,7 +150,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           </div>
 
           {/* Center: Nav links */}
-          <div className="hidden md:flex items-center justify-center gap-2">
+          <div className="hidden md:flex items-center justify-center gap-2 flex-1">
             {user && (
               <>
                 <NavLink label={t('nav.home')} target="home" />
@@ -163,7 +163,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           </div>
 
           {/* Right: Theme + Lang + Profile icon (or Login button) */}
-          <div className="hidden md:flex items-center justify-end gap-2">
+          <div className="hidden md:flex items-center justify-end gap-2 flex-shrink-0">
             <ThemeToggleButton />
             <LanguageDropdown />
             {user ? (
@@ -194,7 +194,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
           </div>
 
           {/* Mobile right */}
-          <div className="md:hidden flex items-center justify-end gap-1.5">
+          <div className="md:hidden flex items-center justify-end gap-1.5 flex-1">
             <ThemeToggleButton />
             <LanguageDropdown />
             <button
