@@ -133,13 +133,11 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
   const NavLink = ({ label, target, primary }) => (
     <button
       onClick={() => { onNavigate(target); setMenuOpen(false); }}
-      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-        route === target ? 'opacity-100' : 'opacity-70 hover:opacity-100'
+      className={`px-3 py-1.5 rounded-lg text-sm transition-all whitespace-nowrap ${
+        route === target ? 'opacity-100 font-semibold' : 'opacity-70 hover:opacity-100 font-medium'
       }`}
       style={{
-        background: primary
-          ? 'var(--text)'
-          : route === target ? 'var(--accent-soft)' : 'transparent',
+        background: primary ? 'var(--text)' : 'transparent',
         color: primary ? 'var(--bg)' : 'var(--text)',
       }}
     >
