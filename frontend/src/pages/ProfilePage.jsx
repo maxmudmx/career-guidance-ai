@@ -265,9 +265,6 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           {profile?.date_of_birth && (
             <ProfileRow label={t('profile.field.birthday')} value={formatDate(profile.date_of_birth)} />
           )}
-          {profile?.stats && (
-            <ProfileRow label={t('profile.field.tests_taken')} value={`${profile.stats.test_count || 0} ${t('profile.tests_unit')}`} />
-          )}
         </Card>
 
         {viewerOpen && avatarSrc && (
