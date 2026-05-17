@@ -2,15 +2,13 @@ import { useEffect, useState } from 'react';
 import { Button, Card } from '../components/ui';
 import { userAPI } from '../services/api';
 import { useTranslation } from '../contexts/LanguageContext';
-import TestResultDetail from '../components/TestResultDetail';
 
-export default function HistoryPage({ onBack }) {
+export default function HistoryPage({ onBack, onOpenTest }) {
   const { t, lang } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
-  const [openId, setOpenId] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -86,87 +84,54 @@ export default function HistoryPage({ onBack }) {
             <p className="text-sm mb-3" style={{ color: 'var(--text-muted)' }}>
               {t('history.total')} <strong style={{ color: 'var(--text)' }}>{history.length}</strong> {t('history.tests')}
             </p>
-            {history.map((item, idx) => (
-              <HistoryItem
-                key={item.id}
-                item={item}
-                index={history.length - idx}
-                isOpen={openId === item.id}
-                onToggle={() => setOpenId(openId === item.id ? null : item.id)}
-                onDelete={(e) => handleDelete(item.id, e)}
-                isDeleting={deletingId === item.id}
-                formatDate={formatDate}
-                t={t}
-              />
-            ))}
+            {history.map((item, idx) => {
+              const testNumber = history.length - idx;
+              const topCareer = item.recommendations?.[0];
+              return (
+                <Card key={item.id} className="overflow-hidden">
+                  <div className="flex items-stretch">
+                    <button
+                      onClick={() => onOpenTest?.(item, testNumber)}
+                      className="flex-1 px-5 py-4 text-left transition-opacity hover:opacity-90"
+                    >
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-xs font-semibold" style={{ color: 'var(--text-faint)' }}>
+                          #{testNumber}
+                        </span>
+                        <span className="text-sm" style={{ color: 'var(--text)' }}>
+                          {formatDate(item.created_at)}
+                        </span>
+                      </div>
+                      {topCareer && (
+                        <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
+                          {topCareer.name_uz || topCareer.name} · {Math.round((topCareer.score || 0) * 100)}%
+                        </div>
+                      )}
+                    </button>
+                    <button
+                      onClick={(e) => handleDelete(item.id, e)}
+                      disabled={deletingId === item.id}
+                      className="px-4 text-xs hover:opacity-70 transition-opacity disabled:opacity-50 border-l"
+                      style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}
+                      aria-label={t('history.btn.delete')}
+                      title={t('history.btn.delete')}
+                    >
+                      {deletingId === item.id ? "..." : (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="3 6 5 6 21 6"/>
+                          <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                          <path d="M10 11v6"/>
+                          <path d="M14 11v6"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
     </div>
-  );
-}
-
-
-function HistoryItem({ item, index, isOpen, onToggle, onDelete, isDeleting, formatDate, t }) {
-  const recs = item.recommendations || [];
-  const topCareer = recs[0];
-
-  return (
-    <Card className="overflow-hidden">
-      {/* Collapsed header — always visible */}
-      <button
-        onClick={onToggle}
-        className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left transition-opacity hover:opacity-90"
-      >
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-faint)' }}>
-              #{index}
-            </span>
-            <span className="text-sm" style={{ color: 'var(--text)' }}>
-              {formatDate(item.created_at)}
-            </span>
-          </div>
-          {topCareer && (
-            <div className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-              {topCareer.name_uz || topCareer.name} · {Math.round((topCareer.score || 0) * 100)}%
-            </div>
-          )}
-        </div>
-        <span
-          className="text-lg transition-transform flex-shrink-0"
-          style={{
-            color: 'var(--text-muted)',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        >
-          ▾
-        </span>
-      </button>
-
-      {/* Expanded body — uses TestResultDetail */}
-      {isOpen && (
-        <div className="px-5 pb-5 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-          <TestResultDetail
-            recommendations={recs}
-            riasecScores={item.riasec_scores || {}}
-            interests={item.academic_data?.interests || []}
-            subjects={item.academic_data?.subjects || []}
-          />
-
-          {/* Delete button */}
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={onDelete}
-              disabled={isDeleting}
-              className="text-xs px-3 py-1.5 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-50"
-              style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
-            >
-              {isDeleting ? "..." : t('history.btn.delete')}
-            </button>
-          </div>
-        </div>
-      )}
-    </Card>
   );
 }

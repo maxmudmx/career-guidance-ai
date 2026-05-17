@@ -3,6 +3,7 @@
  * History ichida (ochilganda) va ResultsPage'da ishlatiladi.
  */
 
+import { useState } from 'react';
 import { useTranslation } from '../contexts/LanguageContext';
 
 const RIASEC_ORDER = ['R', 'I', 'A', 'S', 'E', 'C'];
@@ -227,63 +228,205 @@ function StatBox({ label, value, sub }) {
 
 
 function RecommendationCard({ rank, career, t }) {
+  const [open, setOpen] = useState(false);
   const percent = Math.round((career.score || 0) * 100);
+  const hasFullData = career.description_uz || career.required_skills?.length || career.roadmap?.length;
+
   return (
     <div
-      className="p-4 rounded-lg"
+      className="rounded-lg overflow-hidden"
       style={{ background: 'var(--bg-hover)' }}
     >
-      <div className="flex items-start gap-3 mb-3">
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold"
-          style={{ background: 'var(--text)', color: 'var(--bg)' }}
-        >
-          {rank}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-base font-semibold leading-tight" style={{ color: 'var(--text)' }}>
-            {career.name_uz || career.name}
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
-            {career.category}
-          </div>
-        </div>
-        <div className="text-right flex-shrink-0">
-          <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>
-            {percent}%
-          </div>
-          <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
-            {t('detail.match')}
-          </div>
-        </div>
-      </div>
-
-      {/* Confidence bar */}
-      <div
-        className="h-1.5 rounded-full overflow-hidden mb-3"
-        style={{ background: 'var(--border)' }}
+      {/* Header (always visible, clickable to expand) */}
+      <button
+        onClick={() => hasFullData && setOpen(!open)}
+        className={`w-full p-4 text-left ${hasFullData ? 'transition-opacity hover:opacity-90 cursor-pointer' : 'cursor-default'}`}
       >
-        <div
-          className="h-full rounded-full"
-          style={{ width: `${percent}%`, background: 'var(--text)' }}
-        />
-      </div>
-
-      {/* Why match */}
-      {career.explanation && career.explanation.length > 0 && (
-        <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="text-xs mb-1.5 font-semibold" style={{ color: 'var(--text-faint)' }}>
-            {t('history.why_match')}
+        <div className="flex items-start gap-3 mb-3">
+          <div
+            className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold"
+            style={{ background: 'var(--text)', color: 'var(--bg)' }}
+          >
+            {rank}
           </div>
-          <ul className="space-y-1">
-            {career.explanation.map((ex, j) => (
-              <li key={j} className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                · {ex}
-              </li>
-            ))}
-          </ul>
+          <div className="flex-1 min-w-0">
+            <div className="text-base font-semibold leading-tight" style={{ color: 'var(--text)' }}>
+              {career.name_uz || career.name}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
+              {career.category}
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-xl font-bold" style={{ color: 'var(--text)' }}>
+              {percent}%
+            </div>
+            <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
+              {t('detail.match')}
+            </div>
+          </div>
+        </div>
+
+        {/* Confidence bar */}
+        <div
+          className="h-1.5 rounded-full overflow-hidden mb-3"
+          style={{ background: 'var(--border)' }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${percent}%`, background: 'var(--text)' }}
+          />
+        </div>
+
+        {/* Why match */}
+        {career.explanation && career.explanation.length > 0 && (
+          <div className="pt-2 border-t" style={{ borderColor: 'var(--border)' }}>
+            <div className="text-xs mb-1.5 font-semibold" style={{ color: 'var(--text-faint)' }}>
+              {t('history.why_match')}
+            </div>
+            <ul className="space-y-1">
+              {career.explanation.map((ex, j) => (
+                <li key={j} className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  · {ex}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Expand hint */}
+        {hasFullData && (
+          <div className="flex items-center justify-center gap-1.5 mt-3 pt-2 border-t text-xs"
+            style={{ borderColor: 'var(--border)', color: 'var(--text-muted)' }}>
+            {open ? t('detail.collapse') : t('detail.show_more')}
+            <span
+              className="transition-transform"
+              style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
+            >
+              ▾
+            </span>
+          </div>
+        )}
+      </button>
+
+      {/* Expanded full details */}
+      {open && hasFullData && (
+        <div
+          className="px-4 pb-4 border-t space-y-4"
+          style={{ borderColor: 'var(--border)' }}
+        >
+          {/* Description */}
+          {career.description_uz && (
+            <div className="pt-4">
+              <div className="text-xs uppercase font-semibold mb-1.5" style={{ color: 'var(--text-faint)' }}>
+                {t('detail.description')}
+              </div>
+              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-muted)' }}>
+                {career.description_uz}
+              </p>
+            </div>
+          )}
+
+          {/* Salary, demand, growth */}
+          {(career.avg_salary || career.demand || career.growth) && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {career.avg_salary && (
+                <InfoBox label={t('detail.salary')} value={career.avg_salary} />
+              )}
+              {career.demand && (
+                <InfoBox label={t('detail.demand')} value={career.demand} />
+              )}
+              {career.growth && (
+                <InfoBox label={t('detail.growth')} value={career.growth} />
+              )}
+            </div>
+          )}
+
+          {/* Required skills */}
+          {career.required_skills?.length > 0 && (
+            <div>
+              <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
+                {t('detail.required_skills')}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {career.required_skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-2.5 py-1 rounded-md text-xs"
+                    style={{
+                      background: 'var(--surface)',
+                      color: 'var(--text)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Roadmap — 6 month learning plan */}
+          {career.roadmap?.length > 0 && (
+            <div>
+              <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
+                {t('detail.roadmap')}
+              </div>
+              <div className="space-y-2">
+                {career.roadmap.map((phase, i) => (
+                  <div
+                    key={i}
+                    className="p-3 rounded-lg"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+                  >
+                    <div className="flex items-baseline gap-2 mb-1.5 flex-wrap">
+                      <span className="text-xs font-mono font-bold" style={{ color: 'var(--text-faint)' }}>
+                        {phase.month}
+                      </span>
+                      <span className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+                        {phase.title}
+                      </span>
+                    </div>
+                    {phase.skills?.length > 0 && (
+                      <div className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>
+                        <strong style={{ color: 'var(--text)' }}>{t('detail.skills_to_learn')}:</strong>{' '}
+                        {phase.skills.join(', ')}
+                      </div>
+                    )}
+                    {phase.resources?.length > 0 && (
+                      <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <strong style={{ color: 'var(--text)' }}>{t('detail.resources')}:</strong>
+                        <ul className="mt-1 ml-3 space-y-0.5">
+                          {phase.resources.map((res, j) => (
+                            <li key={j}>· {res}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+
+function InfoBox({ label, value }) {
+  return (
+    <div
+      className="p-3 rounded-lg"
+      style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
+    >
+      <div className="text-xs mb-1" style={{ color: 'var(--text-faint)' }}>
+        {label}
+      </div>
+      <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>
+        {value}
+      </div>
     </div>
   );
 }

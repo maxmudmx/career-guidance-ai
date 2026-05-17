@@ -99,6 +99,16 @@ class RecommendedCareer(BaseModel):
     category: str
     score: float = Field(..., description="Cosine similarity (0-1)")
     explanation: list[str]
+    # To'liq kasb ma'lumotlari
+    description_uz: Optional[str] = ""
+    avg_salary: Optional[str] = ""
+    demand: Optional[str] = ""
+    growth: Optional[str] = ""
+    required_skills: list[str] = []
+    subjects: list[str] = []
+    interests: list[str] = []
+    roadmap: list[dict] = []
+    riasec_career: dict[str, int] = {}
 
 
 class RecommendResponse(BaseModel):

@@ -145,6 +145,18 @@ class ContentBasedRecommender:
                 "category": row["category"],
                 "score": float(scores[idx]),
                 "explanation": self._explain(user_vector, int(idx)),
+                # To'liq kasb ma'lumotlari (frontend uchun)
+                "description_uz": row.get("description_uz", "") or "",
+                "avg_salary": row.get("avg_salary", "") or "",
+                "demand": row.get("demand", "") or "",
+                "growth": row.get("growth", "") or "",
+                "required_skills": list(row.get("required_skills", []) or []),
+                "subjects": list(row.get("subjects", []) or []),
+                "interests": list(row.get("interests", []) or []),
+                "roadmap": row.get("roadmap", []) or [],
+                "riasec_career": {
+                    k: int(row.get(f"riasec_{k}", 0)) for k in ["R", "I", "A", "S", "E", "C"]
+                },
             })
         return results
 

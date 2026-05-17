@@ -81,6 +81,9 @@ def load_careers() -> pd.DataFrame:
             "required_skills": occ.get("required_skills", []),
             "avg_salary": occ.get("avg_salary", ""),
             "demand": occ.get("demand", ""),
+            "growth": occ.get("growth", ""),
+            "roadmap": occ.get("roadmap", []),
+            "age_range": occ.get("age_range", [16, 65]),
         }
         # RIASEC ni alohida ustunlarga ajratamiz: riasec_R, riasec_I, ...
         riasec = occ.get("riasec", [0] * 6)

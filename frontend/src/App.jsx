@@ -13,6 +13,7 @@ import HistoryPage from './pages/HistoryPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import ContactPage from './pages/ContactPage';
+import TestDetailPage from './pages/TestDetailPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import { authAPI, tokenStorage } from './services/api';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -287,6 +288,7 @@ function AppInner() {
   const [step, setStep] = useState(0);
   const [riasecScores, setRiasecScores] = useState(null);
   const [academicData, setAcademicData] = useState(null);
+  const [selectedTest, setSelectedTest] = useState(null);
 
   useEffect(() => {
     const token = tokenStorage.get();
@@ -382,7 +384,32 @@ function AppInner() {
       {route === 'home' && <WelcomePage onStart={handleStartTest} />}
 
       {route === 'history' && user && (
-        <HistoryPage onBack={() => setRoute('home')} />
+        <HistoryPage
+          onBack={() => setRoute('home')}
+          onOpenTest={(test, testNumber) => {
+            setSelectedTest({ ...test, _testNumber: testNumber });
+            setRoute('test-detail');
+          }}
+        />
+      )}
+
+      {route === 'test-detail' && user && selectedTest && (
+        <TestDetailPage
+          recommendations={selectedTest.recommendations || []}
+          riasecScores={selectedTest.riasec_scores || {}}
+          interests={selectedTest.academic_data?.interests || []}
+          subjects={selectedTest.academic_data?.subjects || []}
+          createdAt={selectedTest.created_at}
+          testNumber={selectedTest._testNumber}
+          onBack={() => { setSelectedTest(null); setRoute('history'); }}
+          onRetake={() => {
+            setSelectedTest(null);
+            setStep(0);
+            setRiasecScores(null);
+            setAcademicData(null);
+            setRoute('test');
+          }}
+        />
       )}
 
       {route === 'profile' && user && (
