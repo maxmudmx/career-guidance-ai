@@ -215,10 +215,6 @@ export default function ProfilePage({ user: initialUser, onBack, onUserUpdate })
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text)' }}>
             {profile?.full_name || profile?.username}
           </h1>
-          <p className="text-sm flex items-center justify-center gap-1.5 mt-1" style={{ color: 'var(--text-muted)' }}>
-            <span className="inline-block w-2 h-2 rounded-full" style={{ background: 'var(--text)' }} />
-            {t('profile.online')}
-          </p>
         </div>
 
         {/* Tugmalar */}

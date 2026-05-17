@@ -171,7 +171,10 @@ def edit_profile(
     if data.new_password:
         current_user.password_hash = pwd_context.hash(data.new_password)
 
-    current_user.updated_at = datetime.utcnow()
+    try:
+        current_user.updated_at = datetime.utcnow()
+    except Exception:
+        pass  # updated_at ustun yo'q bo'lsa, e'tibor bermaymiz
     db.commit()
     db.refresh(current_user)
 

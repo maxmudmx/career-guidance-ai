@@ -88,6 +88,9 @@ def create_tables():
         conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE"
         ))
+        conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()"
+        ))
         # Mavjud foydalanuvchilarni grandfather qilish (1 daqiqa avval yaratilganlar)
         conn.execute(text(
             "UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"

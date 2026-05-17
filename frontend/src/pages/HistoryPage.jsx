@@ -3,8 +3,17 @@ import { Button, Card } from '../components/ui';
 import { userAPI } from '../services/api';
 import { useTranslation } from '../contexts/LanguageContext';
 
+const RIASEC_LABELS = {
+  R: 'Realistik',
+  I: 'Tadqiqotchi',
+  A: 'Ijodkor',
+  S: 'Ijtimoiy',
+  E: 'Tadbirkor',
+  C: 'Konvensional',
+};
+
 export default function HistoryPage({ onBack }) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [history, setHistory] = useState([]);
@@ -36,8 +45,9 @@ export default function HistoryPage({ onBack }) {
   const formatDate = (iso) => {
     if (!iso) return '—';
     const d = new Date(iso);
-    return d.toLocaleString('uz-UZ', {
-      year: 'numeric', month: 'short', day: 'numeric',
+    const localeMap = { uz: 'uz-UZ', en: 'en-US', ru: 'ru-RU' };
+    return d.toLocaleString(localeMap[lang] || 'uz-UZ', {
+      year: 'numeric', month: 'long', day: 'numeric',
       hour: '2-digit', minute: '2-digit',
     });
   };
@@ -82,10 +92,11 @@ export default function HistoryPage({ onBack }) {
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               {t('history.total')} <strong style={{ color: 'var(--text)' }}>{history.length}</strong> {t('history.tests')}
             </p>
-            {history.map((item) => (
+            {history.map((item, idx) => (
               <HistoryCard
                 key={item.id}
                 item={item}
+                index={history.length - idx}
                 onDelete={() => handleDelete(item.id)}
                 isDeleting={deletingId === item.id}
                 formatDate={formatDate}
@@ -99,78 +110,123 @@ export default function HistoryPage({ onBack }) {
   );
 }
 
-function HistoryCard({ item, onDelete, isDeleting, formatDate, t }) {
-  const topCareer = item.recommendations?.[0];
-  const riasecDominant = Object.entries(item.riasec_scores || {})
-    .sort(([, a], [, b]) => b - a)[0];
+function HistoryCard({ item, index, onDelete, isDeleting, formatDate, t }) {
+  const recs = item.recommendations || [];
+  const riasecScores = item.riasec_scores || {};
+  const interests = item.academic_data?.interests || [];
+  const subjects = item.academic_data?.subjects || [];
+
+  // RIASEC sorted by score desc
+  const riasecSorted = Object.entries(riasecScores)
+    .map(([k, v]) => ({ key: k, value: Number(v) }))
+    .sort((a, b) => b.value - a.value);
 
   return (
-    <Card className="p-5">
-      <div className="flex items-start justify-between gap-4 mb-3">
-        <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
-          {formatDate(item.created_at)}
+    <Card className="p-6">
+      {/* Header: test number + date + delete */}
+      <div className="flex items-start justify-between gap-4 mb-5 pb-4 border-b"
+        style={{ borderColor: 'var(--border)' }}>
+        <div>
+          <div className="text-xs uppercase font-semibold mb-1" style={{ color: 'var(--text-faint)' }}>
+            {t('history.test_n').replace('{n}', index)}
+          </div>
+          <div className="text-sm" style={{ color: 'var(--text)' }}>
+            {formatDate(item.created_at)}
+          </div>
         </div>
         <button
           onClick={onDelete}
           disabled={isDeleting}
-          className="text-xs px-2 py-1 rounded hover:opacity-70 transition-opacity disabled:opacity-50"
+          className="text-xs px-3 py-1.5 rounded-lg hover:opacity-70 transition-opacity disabled:opacity-50"
           style={{ background: 'var(--bg-hover)', color: 'var(--text)' }}
         >
           {isDeleting ? "..." : t('history.btn.delete')}
         </button>
       </div>
 
-      {topCareer && (
-        <div className="mb-3">
-          <div className="text-xs uppercase font-semibold mb-1" style={{ color: 'var(--text-faint)' }}>
-            {t('history.best_match')}
+      {/* Top recommendations — always visible */}
+      {recs.length > 0 && (
+        <div className="mb-5">
+          <div className="text-xs uppercase font-semibold mb-3" style={{ color: 'var(--text-faint)' }}>
+            {t('history.recommendations')}
           </div>
-          <div className="text-lg font-bold" style={{ color: 'var(--text)' }}>
-            {topCareer.name_uz}
-          </div>
-          <div className="text-xs" style={{ color: 'var(--accent)' }}>
-            {t('history.match_label')} {Math.round((topCareer.score || 0) * 100)}%
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <div className="font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
-            {t('history.dominant_riasec')}
-          </div>
-          <div style={{ color: 'var(--text)' }}>
-            {riasecDominant ? `${riasecDominant[0]} = ${riasecDominant[1]}` : '—'}
-          </div>
-        </div>
-        <div>
-          <div className="font-semibold mb-1" style={{ color: 'var(--text-muted)' }}>
-            {t('history.recommendations_count')}
-          </div>
-          <div style={{ color: 'var(--text)' }}>
-            {(item.recommendations || []).length}
-          </div>
-        </div>
-      </div>
-
-      {item.recommendations && item.recommendations.length > 1 && (
-        <details className="mt-3">
-          <summary
-            className="text-xs cursor-pointer hover:underline"
-            style={{ color: 'var(--accent)' }}
-          >
-            {t('history.show_all')}
-          </summary>
-          <ol className="mt-2 ml-4 space-y-1 text-xs" style={{ color: 'var(--text-muted)' }}>
-            {item.recommendations.map((r, i) => (
-              <li key={i}>
-                <span style={{ color: 'var(--text)' }}>{r.name_uz}</span>
-                <span style={{ color: 'var(--text-faint)' }}> — {Math.round((r.score || 0) * 100)}%</span>
-              </li>
+          <div className="space-y-2">
+            {recs.slice(0, 5).map((r, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between gap-3 p-3 rounded-lg"
+                style={{ background: 'var(--bg-hover)' }}
+              >
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <span className="text-sm font-bold w-6" style={{ color: 'var(--text-muted)' }}>
+                    #{i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold truncate" style={{ color: 'var(--text)' }}>
+                      {r.name_uz || r.name}
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--text-faint)' }}>
+                      {r.category}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm font-bold whitespace-nowrap" style={{ color: 'var(--text)' }}>
+                  {Math.round((r.score || 0) * 100)}%
+                </div>
+              </div>
             ))}
-          </ol>
-        </details>
+          </div>
+        </div>
       )}
+
+      {/* RIASEC scores */}
+      {riasecSorted.length > 0 && (
+        <div className="mb-5">
+          <div className="text-xs uppercase font-semibold mb-3" style={{ color: 'var(--text-faint)' }}>
+            {t('history.riasec_scores')}
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {riasecSorted.map(({ key, value }) => (
+              <div
+                key={key}
+                className="text-center p-2 rounded-lg"
+                style={{ background: 'var(--bg-hover)' }}
+              >
+                <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {key}
+                </div>
+                <div className="text-base font-bold" style={{ color: 'var(--text)' }}>
+                  {value.toFixed(1)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Interests + subjects */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {interests.length > 0 && (
+          <div>
+            <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
+              {t('history.interests')}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {interests.join(', ')}
+            </div>
+          </div>
+        )}
+        {subjects.length > 0 && (
+          <div>
+            <div className="text-xs uppercase font-semibold mb-2" style={{ color: 'var(--text-faint)' }}>
+              {t('history.subjects')}
+            </div>
+            <div className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              {subjects.join(', ')}
+            </div>
+          </div>
+        )}
+      </div>
     </Card>
   );
 }
