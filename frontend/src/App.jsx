@@ -110,6 +110,22 @@ function LanguageDropdown() {
 }
 
 
+function MobileMenuItem({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left px-4 py-3.5 text-base font-medium transition-colors"
+      style={{
+        background: active ? 'var(--bg-hover)' : 'transparent',
+        color: 'var(--text)',
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
+
 function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
   const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -209,26 +225,52 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
 
         {menuOpen && (
           <div
-            className="md:hidden py-3 border-t flex flex-col gap-1"
+            className="md:hidden border-t overflow-hidden"
             style={{ borderColor: 'var(--border)' }}
           >
             {user ? (
-              <>
-                <NavLink label={t('nav.home')} target="home" />
-                <NavLink label={t('nav.test')} target="test" />
-                <NavLink label={t('nav.history')} target="history" />
-                <NavLink label={t('nav.settings')} target="settings" />
-                <NavLink label={t('nav.contact')} target="contact" />
-                <NavLink label={t('nav.profile')} target="profile" />
-              </>
+              <div className="flex flex-col py-2">
+                <MobileMenuItem
+                  label={t('nav.home')}
+                  active={route === 'home'}
+                  onClick={() => { onNavigate('home'); setMenuOpen(false); }}
+                />
+                <MobileMenuItem
+                  label={t('nav.test')}
+                  active={route === 'test'}
+                  onClick={() => { onNavigate('test'); setMenuOpen(false); }}
+                />
+                <MobileMenuItem
+                  label={t('nav.history')}
+                  active={route === 'history'}
+                  onClick={() => { onNavigate('history'); setMenuOpen(false); }}
+                />
+                <MobileMenuItem
+                  label={t('nav.profile')}
+                  active={route === 'profile'}
+                  onClick={() => { onNavigate('profile'); setMenuOpen(false); }}
+                />
+                <MobileMenuItem
+                  label={t('nav.settings')}
+                  active={route === 'settings'}
+                  onClick={() => { onNavigate('settings'); setMenuOpen(false); }}
+                />
+                <MobileMenuItem
+                  label={t('nav.contact')}
+                  active={route === 'contact'}
+                  onClick={() => { onNavigate('contact'); setMenuOpen(false); }}
+                />
+              </div>
             ) : (
-              <button
-                onClick={() => { onStartTest(); setMenuOpen(false); }}
-                className="px-4 py-2 rounded-lg text-sm font-semibold"
-                style={{ background: 'var(--text)', color: 'var(--bg)' }}
-              >
-                {t('nav.login_register')}
-              </button>
+              <div className="py-4">
+                <button
+                  onClick={() => { onStartTest(); setMenuOpen(false); }}
+                  className="w-full px-4 py-3 rounded-lg text-base font-semibold"
+                  style={{ background: 'var(--text)', color: 'var(--bg)' }}
+                >
+                  {t('nav.login_register')}
+                </button>
+              </div>
             )}
           </div>
         )}
