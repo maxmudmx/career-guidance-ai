@@ -1,61 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button, Card } from '../components/ui';
+import { useTranslation } from '../contexts/LanguageContext';
 
+// Savol ID -> kategoriya. Matn t('riasec.q.{id}') orqali tarjima qilinadi.
 const QUESTIONS = [
-  // R - Realistik
-  { id: 1, category: 'R', text: "Men asbob-uskunalar bilan ishlashni yoqtiraman" },
-  { id: 2, category: 'R', text: "Qo'lim bilan biror narsa yasash menga zavq beradi" },
-  { id: 3, category: 'R', text: 'Texnik muammolarni hal qilish menga qiziq' },
-  { id: 4, category: 'R', text: "Kompyuter qurilmalarini yig'ish/ta'mirlash men uchun qiziqarli" },
-  { id: 5, category: 'R', text: "Men amaliy, qo'lga ko'rinadigan natijalarni afzal ko'raman" },
-  // I - Tadqiqotchi
-  { id: 6, category: 'I', text: 'Men ilmiy maqolalar oqishni yoqtiraman' },
-  { id: 7, category: 'I', text: 'Murakkab masalalarni yechish menga qiziq' },
-  { id: 8, category: 'I', text: 'Men narsalarning ichki tuzilishini tushunishga intilaman' },
-  { id: 9, category: 'I', text: 'Tadqiqot va tahlil qilish menga yoqadi' },
-  { id: 10, category: 'I', text: 'Mantiqiy fikrlash mening kuchli tomonim' },
-  // A - Ijodkor
-  { id: 11, category: 'A', text: 'Ijodiy loyihalar menga ilhom beradi' },
-  { id: 12, category: 'A', text: "Men o'zimni badiiy tomondan ifoda etishni yoqtiraman" },
-  { id: 13, category: 'A', text: 'Dizayn va estetika menga muhim' },
-  { id: 14, category: 'A', text: "Men yangi g'oyalar yaratishda faolman" },
-  { id: 15, category: 'A', text: "Musiqa, san'at yoki yozuv bilan shug'ullanaman" },
-  // S - Ijtimoiy
-  { id: 16, category: 'S', text: 'Odamlarga yordam berish menga zavq beradi' },
-  { id: 17, category: 'S', text: "Men jamoada ishlashni afzal ko'raman" },
-  { id: 18, category: 'S', text: "Boshqalarni o'qitish yoki maslahat berish menga yoqadi" },
-  { id: 19, category: 'S', text: 'Muloqot qilish mening kuchli tomonim' },
-  { id: 20, category: 'S', text: 'Men boshqalarning muammolarini hal qilishga tayyor' },
-  // E - Tadbirkor
-  { id: 21, category: 'E', text: 'Men rahbarlik qilishni yoqtiraman' },
-  { id: 22, category: 'E', text: 'Biznes va tadbirkorlik menga qiziq' },
-  { id: 23, category: 'E', text: 'Men boshqalarni ishontira olaman' },
-  { id: 24, category: 'E', text: "Qaror qabul qilishda tashabbuskor bo'laman" },
-  { id: 25, category: 'E', text: 'Raqobat va muvaffaqiyat menga motivatsiya beradi' },
-  // C - Konvensional
-  { id: 26, category: 'C', text: "Tartibli va tizimli ishlashni afzal ko'raman" },
-  { id: 27, category: 'C', text: "Ma'lumotlarni tartibga solish menga yoqadi" },
-  { id: 28, category: 'C', text: 'Men qoidalarga rioya qilishni muhim deb bilaman' },
-  { id: 29, category: 'C', text: "Detallarga e'tibor berish mening kuchli tomonim" },
-  { id: 30, category: 'C', text: "Aniq ko'rsatmalar bo'yicha ishlash menga qulay" },
+  { id: 1, category: 'R' }, { id: 2, category: 'R' }, { id: 3, category: 'R' },
+  { id: 4, category: 'R' }, { id: 5, category: 'R' },
+  { id: 6, category: 'I' }, { id: 7, category: 'I' }, { id: 8, category: 'I' },
+  { id: 9, category: 'I' }, { id: 10, category: 'I' },
+  { id: 11, category: 'A' }, { id: 12, category: 'A' }, { id: 13, category: 'A' },
+  { id: 14, category: 'A' }, { id: 15, category: 'A' },
+  { id: 16, category: 'S' }, { id: 17, category: 'S' }, { id: 18, category: 'S' },
+  { id: 19, category: 'S' }, { id: 20, category: 'S' },
+  { id: 21, category: 'E' }, { id: 22, category: 'E' }, { id: 23, category: 'E' },
+  { id: 24, category: 'E' }, { id: 25, category: 'E' },
+  { id: 26, category: 'C' }, { id: 27, category: 'C' }, { id: 28, category: 'C' },
+  { id: 29, category: 'C' }, { id: 30, category: 'C' },
 ];
 
-const CATEGORIES = {
-  R: { name: 'Realistik', color: 'var(--text)', desc: 'Amaliy va texnik ishlar' },
-  I: { name: 'Tadqiqotchi', color: 'var(--text)', desc: 'Ilm va tahlil' },
-  A: { name: 'Ijodkor', color: 'var(--text)', desc: "San'at va ijod" },
-  S: { name: 'Ijtimoiy', color: 'var(--text)', desc: 'Odamlar bilan ishlash' },
-  E: { name: 'Tadbirkor', color: 'var(--text)', desc: 'Biznes va rahbarlik' },
-  C: { name: 'Konvensional', color: 'var(--text)', desc: 'Tizimli ishlar' },
-};
-
-const LIKERT = [
-  { value: 1, label: "Umuman yo'q" },
-  { value: 2, label: 'Kam' },
-  { value: 3, label: "O'rtacha" },
-  { value: 4, label: "Ko'p" },
-  { value: 5, label: "Juda ko'p" },
-];
+const CATEGORY_KEYS = ['R', 'I', 'A', 'S', 'E', 'C'];
+const LIKERT_VALUES = [1, 2, 3, 4, 5];
 
 function calculateScores(answers) {
   const scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
@@ -71,14 +35,22 @@ function calculateScores(answers) {
 }
 
 export default function RiasecTest({ onComplete, onBack }) {
+  const { t } = useTranslation();
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [countdown, setCountdown] = useState(null);
   const [showTransition, setShowTransition] = useState(false);
 
+  const getCategory = (key) => ({
+    name: t(`riasec.cat.${key}.name`),
+    desc: t(`riasec.cat.${key}.desc`),
+    color: 'var(--text)',
+  });
+  const LIKERT = LIKERT_VALUES.map((v) => ({ value: v, label: t(`riasec.likert.${v}`) }));
+
   const question = QUESTIONS[currentQ];
   const total = QUESTIONS.length;
-  const category = CATEGORIES[question.category];
+  const category = getCategory(question.category);
   const percentage = ((currentQ + 1) / total) * 100;
 
   const currentSection = Math.floor(currentQ / 5);
@@ -86,7 +58,7 @@ export default function RiasecTest({ onComplete, onBack }) {
   const isSectionEnd = currentSection !== nextSection && currentQ < total - 1;
 
   // Har kategoriya bo'yicha javoblar holati
-  const categoryStatus = Object.keys(CATEGORIES).map((cat) => {
+  const categoryStatus = CATEGORY_KEYS.map((cat) => {
     const catQuestions = QUESTIONS.filter((q) => q.category === cat);
     const answered = catQuestions.filter((q) => answers[q.id] !== undefined).length;
     return {
@@ -148,15 +120,15 @@ export default function RiasecTest({ onComplete, onBack }) {
 
   // Section transition ekrani
   if (showTransition) {
-    const nextCat = CATEGORIES[QUESTIONS[currentQ + 1].category];
+    const nextCat = getCategory(QUESTIONS[currentQ + 1].category);
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center px-6 font-sans">
+      <div className="min-h-screen flex items-center justify-center px-6 font-sans" style={{ background: 'var(--bg)' }}>
         <div className="text-center">
-          <h2 className="text-2xl text-[#111827] mb-2 font-semibold">
-            {category.name} bo'limi tugadi
+          <h2 className="text-2xl mb-2 font-semibold" style={{ color: 'var(--text)' }}>
+            {t('riasec.section_done').replace('{cat}', category.name)}
           </h2>
-          <p className="text-[#4B5563]">
-            Endi {nextCat.desc.toLowerCase()}ni o'rganamiz
+          <p style={{ color: 'var(--text-muted)' }}>
+            {t('riasec.next_section').replace('{next}', nextCat.desc.toLowerCase())}
           </p>
         </div>
       </div>
@@ -212,7 +184,7 @@ export default function RiasecTest({ onComplete, onBack }) {
         {onBack && currentQ === 0 && (
           <div className="mb-4">
             <Button variant="ghost" size="sm" onClick={onBack}>
-              Bosh sahifaga
+              {t('riasec.btn.back_to_home')}
             </Button>
           </div>
         )}
@@ -235,9 +207,11 @@ export default function RiasecTest({ onComplete, onBack }) {
 
           {/* Question text */}
           <div className="mb-8">
-            <div className="text-xs text-[#9CA3AF] mb-2 font-medium">Q{question.id}</div>
-            <h2 className="text-xl md:text-2xl text-[#111827] leading-relaxed">
-              {question.text}
+            <div className="text-xs mb-2 font-medium" style={{ color: 'var(--text-faint)' }}>
+              {t('riasec.q_label').replace('{n}', question.id)}
+            </div>
+            <h2 className="text-xl md:text-2xl leading-relaxed" style={{ color: 'var(--text)' }}>
+              {t(`riasec.q.${question.id}`)}
             </h2>
           </div>
 
@@ -276,12 +250,15 @@ export default function RiasecTest({ onComplete, onBack }) {
 
           {/* Auto-advance countdown */}
           {countdown !== null && (
-            <div className="flex items-center justify-between p-3 bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg mb-6">
-              <span className="text-sm text-[#4B5563]">
-                Keyingi savolga {countdown} soniyada...
+            <div
+              className="flex items-center justify-between p-3 rounded-lg mb-6 border"
+              style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+            >
+              <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {t('riasec.countdown').replace('{sec}', countdown)}
               </span>
               <Button variant="ghost" size="sm" onClick={() => setCountdown(null)}>
-                Bekor qilish
+                {t('riasec.cancel_countdown')}
               </Button>
             </div>
           )}
@@ -296,21 +273,21 @@ export default function RiasecTest({ onComplete, onBack }) {
                   setCurrentQ((q) => q - 1);
                 }}
               >
-                Orqaga
+                {t('riasec.btn.back')}
               </Button>
             ) : (
               <div />
             )}
 
             <Button variant="primary" onClick={goNext} disabled={!answered}>
-              {currentQ === total - 1 ? 'Tugatish' : 'Keyingisi'}
+              {currentQ === total - 1 ? t('riasec.btn.finish') : t('riasec.btn.next')}
             </Button>
           </div>
 
           {/* Keyboard hint */}
-          <div className="mt-6 pt-6 border-t border-[#E5E7EB]">
-            <div className="text-sm text-[#9CA3AF]">
-              Klaviatura: 1–5 raqamlar — javob, Enter — keyingisi
+          <div className="mt-6 pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
+            <div className="text-sm" style={{ color: 'var(--text-faint)' }}>
+              {t('riasec.keyboard_hint')}
             </div>
           </div>
         </Card>

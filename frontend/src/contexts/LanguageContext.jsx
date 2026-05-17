@@ -24,7 +24,9 @@ export function LanguageProvider({ children }) {
 
   const t = (key) => {
     const dict = translations[lang] || translations[DEFAULT_LANG];
-    return dict[key] || translations[DEFAULT_LANG][key] || key;
+    if (key in dict) return dict[key];
+    if (key in translations[DEFAULT_LANG]) return translations[DEFAULT_LANG][key];
+    return key;
   };
 
   return (
