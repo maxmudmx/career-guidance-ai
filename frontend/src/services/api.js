@@ -19,9 +19,15 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    // 401 bo'lsa va so'rov auth talab qiladigan endpointga bo'lsa — tokenni tozalaymiz.
+    // /predict/* endpointlari optional auth bilan ishlaydi, ularda token tozalanmaydi.
     if (err.response?.status === 401) {
-      localStorage.removeItem('kasbim_token');
-      localStorage.removeItem('kasbim_user');
+      const url = err.config?.url || '';
+      const isOptionalAuthEndpoint = url.includes('/predict/');
+      if (!isOptionalAuthEndpoint) {
+        localStorage.removeItem('kasbim_token');
+        localStorage.removeItem('kasbim_user');
+      }
     }
     return Promise.reject(err);
   }

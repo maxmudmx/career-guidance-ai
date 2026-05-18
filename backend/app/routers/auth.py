@@ -107,6 +107,20 @@ def require_auth(
     return user
 
 
+def optional_auth(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Auth optional — token bo'lmasa yoki yaroqsiz bo'lsa None qaytaradi."""
+    if not token:
+        return None
+    payload = verify_token(token)
+    if not payload:
+        return None
+    user = db.query(User).filter(User.id == payload.get("user_id")).first()
+    return user
+
+
 def _user_to_dict(user: User) -> dict:
     return {
         "id": user.id,
