@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     EMAIL_FROM_NAME: str = "Kasbim"
     EMAIL_VERIFICATION_TTL_MINUTES: int = 15
 
+    # Super-admin: bu emaildan adminlikni hech kim olib tashlay olmaydi
+    # va bu foydalanuvchini o'chirib bo'lmaydi.
+    SUPER_ADMIN_EMAIL: str = "elmurodovmaxmud8@gmail.com"
+
     class Config:
         env_file = ".env"
         extra = "ignore"

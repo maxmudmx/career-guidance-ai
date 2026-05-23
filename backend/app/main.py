@@ -120,13 +120,22 @@ def create_tables():
             "UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"
         ))
 
-        # Admin bootstrap: agar ADMIN_EMAIL env o'rnatilgan bo'lsa, o'sha foydalanuvchini admin qilish;
-        # aks holda — hech qanday admin yo'q bo'lsa, eng birinchi (id eng kichik) foydalanuvchini admin qilish.
+        # Super-admin (config.py'dan) HAR DOIM admin bo'lishi kafolatlanadi
+        from app.config import settings as _s
+        super_email = (_s.SUPER_ADMIN_EMAIL or "").strip().lower()
+        if super_email:
+            conn.execute(text(
+                "UPDATE users SET is_admin = TRUE WHERE LOWER(email) = :em"
+            ), {"em": super_email})
+
+        # ADMIN_EMAIL env (qo'shimcha admin) — agar berilgan bo'lsa
         admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
-        if admin_email:
+        if admin_email and admin_email != super_email:
             conn.execute(text(
                 "UPDATE users SET is_admin = TRUE WHERE LOWER(email) = :em"
             ), {"em": admin_email})
+
+        # Hech qanday admin yo'q bo'lsa — eng birinchi (id eng kichik) foydalanuvchini admin qilish
         any_admin = conn.execute(text("SELECT 1 FROM users WHERE is_admin = TRUE LIMIT 1")).fetchone()
         if not any_admin:
             conn.execute(text(

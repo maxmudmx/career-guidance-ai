@@ -144,9 +144,40 @@ export const adminAPI = {
   /** Dashboard statistikasi */
   getStats: () => api.get('/admin/stats'),
 
-  /** Foydalanuvchilar ro'yxati (qidiruv + pagination) */
-  listUsers: ({ q = '', limit = 50, offset = 0 } = {}) =>
-    api.get('/admin/users', { params: { q, limit, offset } }),
+  /** Tizim holati (backend, DB, model) */
+  getSystem: () => api.get('/admin/system'),
+
+  /** Oxirgi N kunlik faollik (signup + test) */
+  getActivity: (days = 7) => api.get('/admin/activity', { params: { days } }),
+
+  /** Eng ko'p tavsiya etilgan kasblar */
+  getTopCareers: (limit = 10) => api.get('/admin/top-careers', { params: { limit } }),
+
+  /** Foydalanuvchilar ro'yxati */
+  listUsers: ({ q = '', only = 'all', limit = 50, offset = 0 } = {}) =>
+    api.get('/admin/users', { params: { q, only, limit, offset } }),
+
+  /** Foydalanuvchi tafsiloti + test tarixi */
+  getUser: (userId) => api.get(`/admin/users/${userId}`),
+
+  /** CSV eksport URL (token bilan brauzerda ochish uchun) */
+  usersCsvUrl: () => {
+    const token = localStorage.getItem('kasbim_token') || '';
+    const base = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+    // Eksport autentifikatsiya talab qiladi; brauzer faqat URL bilan token yubora olmaydi,
+    // shuning uchun adminPanel orqali fetch qilib blob yuklab beramiz (downloadUsersCsv).
+    return `${base}/admin/users.csv`;
+  },
+  downloadUsersCsv: async () => {
+    const resp = await api.get('/admin/users.csv', { responseType: 'blob' });
+    const blob = new Blob([resp.data], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kasbim-users-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
 
   /** Foydalanuvchini o'chirish */
   deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
@@ -161,6 +192,9 @@ export const adminAPI = {
     if (userId !== null && userId !== undefined) params.user_id = userId;
     return api.get('/admin/tests', { params });
   },
+
+  /** Test natijasi to'liq tafsiloti */
+  getTest: (testId) => api.get(`/admin/tests/${testId}`),
 
   /** Test natijasini o'chirish */
   deleteTest: (testId) => api.delete(`/admin/tests/${testId}`),

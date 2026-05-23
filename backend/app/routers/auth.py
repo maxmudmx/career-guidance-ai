@@ -129,6 +129,7 @@ def require_admin(current_user: User = Depends(require_auth)) -> User:
 
 
 def _user_to_dict(user: User) -> dict:
+    super_email = (settings.SUPER_ADMIN_EMAIL or "").strip().lower()
     return {
         "id": user.id,
         "username": user.username,
@@ -136,6 +137,7 @@ def _user_to_dict(user: User) -> dict:
         "full_name": user.full_name,
         "is_verified": bool(getattr(user, "is_verified", False)),
         "is_admin": bool(getattr(user, "is_admin", False)),
+        "is_super_admin": bool(super_email and (user.email or "").lower() == super_email),
         "created_at": user.created_at.isoformat() if user.created_at else None,
     }
 

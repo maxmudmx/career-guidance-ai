@@ -80,6 +80,8 @@ class ChangePasswordRequest(BaseModel):
 
 
 def _user_to_dict(user: User) -> dict:
+    from app.config import settings as _s
+    super_email = (_s.SUPER_ADMIN_EMAIL or "").strip().lower()
     return {
         "id": user.id,
         "username": user.username,
@@ -89,6 +91,7 @@ def _user_to_dict(user: User) -> dict:
         "region": user.region,
         "date_of_birth": user.date_of_birth.isoformat() if user.date_of_birth else None,
         "is_admin": bool(getattr(user, "is_admin", False)),
+        "is_super_admin": bool(super_email and (user.email or "").lower() == super_email),
         "created_at": user.created_at.isoformat() if user.created_at else None,
     }
 
