@@ -88,6 +88,7 @@ def _user_to_dict(user: User) -> dict:
         "avatar_url": user.avatar_url,
         "region": user.region,
         "date_of_birth": user.date_of_birth.isoformat() if user.date_of_birth else None,
+        "is_admin": bool(getattr(user, "is_admin", False)),
         "created_at": user.created_at.isoformat() if user.created_at else None,
     }
 

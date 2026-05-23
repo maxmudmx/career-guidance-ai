@@ -20,6 +20,7 @@ class User(Base):
     region = Column(String(100), nullable=True)
     date_of_birth = Column(Date, nullable=True)
     is_verified = Column(Boolean, default=False, nullable=False, server_default="false")
+    is_admin = Column(Boolean, default=False, nullable=False, server_default="false")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     test_results = relationship("TestResult", back_populates="user", cascade="all, delete-orphan")

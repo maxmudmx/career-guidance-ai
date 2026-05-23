@@ -121,6 +121,13 @@ def optional_auth(
     return user
 
 
+def require_admin(current_user: User = Depends(require_auth)) -> User:
+    """Faqat admin bo'lgan foydalanuvchilarga ruxsat beradi."""
+    if not bool(getattr(current_user, "is_admin", False)):
+        raise HTTPException(status_code=403, detail="Bu amal faqat administrator uchun")
+    return current_user
+
+
 def _user_to_dict(user: User) -> dict:
     return {
         "id": user.id,
@@ -128,6 +135,7 @@ def _user_to_dict(user: User) -> dict:
         "email": user.email,
         "full_name": user.full_name,
         "is_verified": bool(getattr(user, "is_verified", False)),
+        "is_admin": bool(getattr(user, "is_admin", False)),
         "created_at": user.created_at.isoformat() if user.created_at else None,
     }
 

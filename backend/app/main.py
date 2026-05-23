@@ -15,7 +15,7 @@ logging.basicConfig(
     force=True,
 )
 
-from app.routers import auth, test, prediction, users
+from app.routers import auth, test, prediction, users, admin
 
 app = FastAPI(
     title="Kasbim API",
@@ -37,6 +37,7 @@ app.include_router(auth.router)
 app.include_router(test.router)
 app.include_router(prediction.router)
 app.include_router(users.router)
+app.include_router(admin.router)
 
 
 # Static fayllar (avatarlar)
@@ -89,6 +90,9 @@ def create_tables():
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_verified BOOLEAN NOT NULL DEFAULT FALSE"
         ))
         conn.execute(text(
+            "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE"
+        ))
+        conn.execute(text(
             "ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()"
         ))
 
@@ -115,6 +119,19 @@ def create_tables():
         conn.execute(text(
             "UPDATE users SET is_verified = TRUE WHERE is_verified = FALSE AND created_at < NOW() - INTERVAL '1 minute'"
         ))
+
+        # Admin bootstrap: agar ADMIN_EMAIL env o'rnatilgan bo'lsa, o'sha foydalanuvchini admin qilish;
+        # aks holda — hech qanday admin yo'q bo'lsa, eng birinchi (id eng kichik) foydalanuvchini admin qilish.
+        admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
+        if admin_email:
+            conn.execute(text(
+                "UPDATE users SET is_admin = TRUE WHERE LOWER(email) = :em"
+            ), {"em": admin_email})
+        any_admin = conn.execute(text("SELECT 1 FROM users WHERE is_admin = TRUE LIMIT 1")).fetchone()
+        if not any_admin:
+            conn.execute(text(
+                "UPDATE users SET is_admin = TRUE WHERE id = (SELECT id FROM users ORDER BY id ASC LIMIT 1)"
+            ))
 
 
 @app.on_event("startup")

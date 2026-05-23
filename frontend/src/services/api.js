@@ -136,6 +136,39 @@ export const userAPI = {
   getStats: () => api.get('/users/stats'),
 };
 
+// ============================================================
+// Admin panel
+// ============================================================
+
+export const adminAPI = {
+  /** Dashboard statistikasi */
+  getStats: () => api.get('/admin/stats'),
+
+  /** Foydalanuvchilar ro'yxati (qidiruv + pagination) */
+  listUsers: ({ q = '', limit = 50, offset = 0 } = {}) =>
+    api.get('/admin/users', { params: { q, limit, offset } }),
+
+  /** Foydalanuvchini o'chirish */
+  deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+
+  /** Admin huquqini berish/olib tashlash */
+  setAdmin: (userId, isAdmin) =>
+    api.patch(`/admin/users/${userId}/admin`, { is_admin: !!isAdmin }),
+
+  /** Test natijalari ro'yxati */
+  listTests: ({ userId = null, limit = 50, offset = 0 } = {}) => {
+    const params = { limit, offset };
+    if (userId !== null && userId !== undefined) params.user_id = userId;
+    return api.get('/admin/tests', { params });
+  },
+
+  /** Test natijasini o'chirish */
+  deleteTest: (testId) => api.delete(`/admin/tests/${testId}`),
+
+  /** Kasblar bazasi qisqacha ma'lumoti */
+  getOccupations: () => api.get('/admin/occupations'),
+};
+
 // Eski sahifalar uchun alias (AcademicSkills bilan moslik)
 export const predictAPI = {
   getMetadata: () => api.get('/predict/metadata'),

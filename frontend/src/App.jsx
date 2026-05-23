@@ -15,6 +15,7 @@ import SettingsPage from './pages/SettingsPage';
 import ContactPage from './pages/ContactPage';
 import TestDetailPage from './pages/TestDetailPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
+import AdminPanel from './pages/AdminPanel';
 import { authAPI, tokenStorage } from './services/api';
 import { ChevronDown } from './components/ChevronDown';
 import { Logo } from './components/Logo';
@@ -171,6 +172,7 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                 <NavLink label={t('nav.history')} target="history" />
                 <NavLink label={t('nav.settings')} target="settings" />
                 <NavLink label={t('nav.contact')} target="contact" />
+                {user.is_admin && <NavLink label="Admin" target="admin" />}
               </>
             )}
           </div>
@@ -257,6 +259,13 @@ function TopBar({ user, route, onNavigate, onLogout, onStartTest }) {
                   active={route === 'contact'}
                   onClick={() => { onNavigate('contact'); setMenuOpen(false); }}
                 />
+                {user.is_admin && (
+                  <MobileMenuItem
+                    label="Admin"
+                    active={route === 'admin'}
+                    onClick={() => { onNavigate('admin'); setMenuOpen(false); }}
+                  />
+                )}
               </div>
             ) : (
               <div className="py-4">
@@ -432,6 +441,10 @@ function AppInner() {
       )}
 
       {route === 'contact' && <ContactPage />}
+
+      {route === 'admin' && user && user.is_admin && (
+        <AdminPanel onBack={() => setRoute('home')} />
+      )}
 
       {route === 'test' && user && (
         <>
