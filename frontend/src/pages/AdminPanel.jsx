@@ -1,13 +1,14 @@
 /**
  * Admin paneli — terminal/coding aesthetic.
- * O'z dizayniga ega (app theme'ga bog'liq emas): doimo qora fon, monospace shrift.
+ * App theme (dark/light) ga moslashadi.
  * Klaviatura: "/" qidiruv, "1..4" tab almashinuvi, "Esc" modalni yopish.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { adminAPI } from '../services/api';
+import { useTheme } from '../hooks/useTheme';
 
-// ─── Dizayn tokenlar ────────────────────────────────────────
-const T = {
+// ─── Dizayn tokenlar (dark va light) ────────────────────────
+const DARK_T = {
   bg: '#0D1117',
   surface: '#161B22',
   surface2: '#1C2128',
@@ -24,6 +25,25 @@ const T = {
   purple: '#BC8CFF',
   pink: '#FF7B72',
 };
+const LIGHT_T = {
+  bg: '#FFFFFF',
+  surface: '#F6F8FA',
+  surface2: '#EAEEF2',
+  surface3: '#D8DEE4',
+  border: '#D0D7DE',
+  borderStrong: '#AFB8C1',
+  text: '#1F2328',
+  muted: '#656D76',
+  faint: '#8C959F',
+  green: '#1A7F37',
+  cyan: '#0969DA',
+  amber: '#9A6700',
+  red: '#CF222E',
+  purple: '#8250DF',
+  pink: '#BF3989',
+};
+const TokenContext = createContext(DARK_T);
+const useTokens = () => useContext(TokenContext);
 const MONO = "'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', 'Cascadia Code', monospace";
 
 const TABS = [
@@ -60,7 +80,9 @@ function Dot({ color, glow = false }) {
   }} />;
 }
 
-function Pill({ children, color = T.cyan, bg = null }) {
+function Pill({ children, color, bg = null }) {
+  const T = useTokens();
+  color = color || T.cyan;
   return (
     <span style={{
       display: 'inline-block',
@@ -76,8 +98,9 @@ function Pill({ children, color = T.cyan, bg = null }) {
   );
 }
 
-function Btn({ children, onClick, color = T.text, disabled = false, title, danger = false, primary = false }) {
-  const c = danger ? T.red : primary ? T.green : color;
+function Btn({ children, onClick, color, disabled = false, title, danger = false, primary = false }) {
+  const T = useTokens();
+  const c = danger ? T.red : primary ? T.green : (color || T.text);
   return (
     <button
       onClick={disabled ? undefined : onClick}
@@ -97,7 +120,9 @@ function Btn({ children, onClick, color = T.text, disabled = false, title, dange
   );
 }
 
-function Panel({ children, title, accent = T.cyan, style = {} }) {
+function Panel({ children, title, accent, style = {} }) {
+  const T = useTokens();
+  accent = accent || T.cyan;
   return (
     <div style={{
       background: T.surface, border: `1px solid ${T.border}`, borderRadius: 6,
@@ -119,7 +144,9 @@ function Panel({ children, title, accent = T.cyan, style = {} }) {
   );
 }
 
-function Stat({ label, value, accent = T.green, hint }) {
+function Stat({ label, value, accent, hint }) {
+  const T = useTokens();
+  accent = accent || T.green;
   return (
     <div style={{
       background: T.surface, border: `1px solid ${T.border}`, borderRadius: 6,
@@ -138,6 +165,7 @@ function Stat({ label, value, accent = T.green, hint }) {
 
 // ─── Activity sparkline (SVG) ───────────────────────────────
 function ActivityChart({ series }) {
+  const T = useTokens();
   if (!series || series.length === 0) return null;
   const W = 600, H = 140, P = 24;
   const maxV = Math.max(1, ...series.flatMap(s => [s.users, s.tests]));
@@ -179,7 +207,9 @@ function ActivityChart({ series }) {
 }
 
 // ─── Modal ──────────────────────────────────────────────────
-function Modal({ open, onClose, title, children, accent = T.cyan }) {
+function Modal({ open, onClose, title, children, accent }) {
+  const T = useTokens();
+  accent = accent || T.cyan;
   useEffect(() => {
     if (!open) return;
     const h = (e) => { if (e.key === 'Escape') onClose(); };
@@ -223,6 +253,7 @@ function Modal({ open, onClose, title, children, accent = T.cyan }) {
 
 // ─── DASHBOARD TAB ──────────────────────────────────────────
 function DashboardTab() {
+  const T = useTokens();
   const [stats, setStats] = useState(null);
   const [system, setSystem] = useState(null);
   const [activity, setActivity] = useState(null);
@@ -337,6 +368,7 @@ function DashboardTab() {
 }
 
 function Row({ label, value }) {
+  const T = useTokens();
   return (
     <div style={{
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -351,6 +383,7 @@ function Row({ label, value }) {
 
 // ─── USERS TAB ──────────────────────────────────────────────
 function UsersTab({ searchRef }) {
+  const T = useTokens();
   const [q, setQ] = useState('');
   const [only, setOnly] = useState('all');
   const [data, setData] = useState({ total: 0, items: [] });
@@ -547,6 +580,7 @@ function UsersTab({ searchRef }) {
 
 // ─── TESTS TAB ──────────────────────────────────────────────
 function TestsTab() {
+  const T = useTokens();
   const [data, setData] = useState({ total: 0, items: [] });
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -651,6 +685,7 @@ function TestsTab() {
 
 // ─── CAREERS TAB ────────────────────────────────────────────
 function CareersTab() {
+  const T = useTokens();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
@@ -738,6 +773,17 @@ function CareersTab() {
 
 // ─── ASOSIY SAHIFA ──────────────────────────────────────────
 export default function AdminPanel({ onBack }) {
+  const { theme } = useTheme();
+  const T = theme === 'light' ? LIGHT_T : DARK_T;
+  return (
+    <TokenContext.Provider value={T}>
+      <AdminPanelInner onBack={onBack} />
+    </TokenContext.Provider>
+  );
+}
+
+function AdminPanelInner({ onBack }) {
+  const T = useTokens();
   const [tab, setTab] = useState('dashboard');
   const [time, setTime] = useState(new Date());
   const searchRef = useRef(null);
